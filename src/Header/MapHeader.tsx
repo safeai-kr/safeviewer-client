@@ -46,7 +46,7 @@ const MapHeader: React.FC = () => {
           withCredentials: true,
         }
       );
-      alert("다시 로그인 해주세요!");
+      alert("다시 로그인 해주세요");
       console.log(response.data);
       navigate("/");
     } catch (e) {
