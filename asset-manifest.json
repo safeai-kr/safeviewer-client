@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/safeviewer-client/static/css/main.67ea1697.css",
+    "main.js": "/safeviewer-client/static/js/main.6151a466.js",
+    "index.html": "/safeviewer-client/index.html",
+    "main.67ea1697.css.map": "/safeviewer-client/static/css/main.67ea1697.css.map",
+    "main.6151a466.js.map": "/safeviewer-client/static/js/main.6151a466.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.67ea1697.css",
+    "static/js/main.6151a466.js"
+  ]
+}
