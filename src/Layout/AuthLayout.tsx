@@ -8,7 +8,6 @@ const AuthLayout: React.FC = () => {
     <>
       {/* 로그인 되었을 때 헤더랑 탭 뜨도록 */}
       <MapHeader />
-      <Tab />
       <Outlet />
     </>
   );

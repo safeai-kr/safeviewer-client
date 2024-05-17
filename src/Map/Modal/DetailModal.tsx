@@ -1,5 +1,7 @@
 import React, { Dispatch, SetStateAction } from "react";
+import { useNavigate, useNavigation } from "react-router-dom";
 import styled from "styled-components";
+
 interface ModalProps {
   setMarkerClicked: Dispatch<SetStateAction<boolean>>;
   modalPosition: { x: number; y: number };
@@ -7,7 +9,7 @@ interface ModalProps {
 }
 const ModalContainer = styled.div<{ position: { x: number; y: number } }>`
   width: 30%;
-  height: 30%;
+  height: auto;
   position: fixed;
   left: ${({ position }) => position.x}px;
   top: ${({ position }) => position.y}px;
@@ -25,14 +27,19 @@ const ModalHeader = styled.div`
   justify-content: center;
   background-color: black;
   color: white;
+  position: relative;
   font-size: 16px;
   padding: 5px 0px 5px 0px;
   width: 100%;
 `;
+const HeaderTxt = styled.div`
+  flex-grow: 1;
+  text-align: center;
+`;
 const CloseBtn = styled.div`
-  margin-left: 7.5em;
-  margin-right: -8.5rem;
+  position: absolute;
   cursor: pointer;
+  right: 10px;
 `;
 const ModalContents = styled.div`
   display: flex;
@@ -51,7 +58,7 @@ const DetailBtn = styled.button`
   font-size: 16px;
   width: 100%;
   background-color: black;
-  padding: 3px 0px 3px 0px;
+  padding: 3px 0;
 `;
 const TextArea = styled.div`
   display: flex;
@@ -70,10 +77,15 @@ const DetailModal: React.FC<ModalProps> = ({
   modalPosition,
   setImgLayerOn,
 }) => {
+  const navigate = useNavigate();
+  const data = {
+    name: "Ship Detection(Incheon)",
+    content: "Detailed information about Ship Detection",
+  };
   return (
     <ModalContainer position={modalPosition}>
       <ModalHeader>
-        Ship Detection(Incheon)
+        <HeaderTxt>Ship Detection(Incheon)</HeaderTxt>
         <CloseBtn
           onClick={() => {
             setMarkerClicked(false);
@@ -95,6 +107,7 @@ const DetailModal: React.FC<ModalProps> = ({
         onClick={() => {
           setImgLayerOn(true);
           setMarkerClicked(false);
+          navigate("/auth/projects", { state: { data } });
         }}
       >
         View Details

@@ -6,6 +6,7 @@ import SignUp from "./Login/SignUp";
 import Login from "./Login/Login";
 import NAuthLayout from "./Layout/NAuthLayout";
 import AuthLayout from "./Layout/AuthLayout";
+import ProjectView from "./Projects/ProjectView";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: "main",
         element: <MapView />,
+      },
+      {
+        path: "projects",
+        element: <ProjectView />,
       },
     ],
   },

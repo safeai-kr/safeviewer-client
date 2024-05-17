@@ -12,6 +12,7 @@ const HeaderContainer = styled.div`
   height: 28px;
   background-color: #272727;
   display: flex;
+  padding: 10px 12px;
   align-items: center;
   justify-content: space-between;
 `;
@@ -19,7 +20,6 @@ const HeaderContainer = styled.div`
 const Contents = styled.div`
   display: flex;
   align-items: center;
-  padding-left: 16px;
 `;
 const HeaderTxt = styled.div`
   color: #58595b;
@@ -31,7 +31,7 @@ const Logo = styled(FontAwesomeIcon)`
   float: left;
   height: 18px;
   weight: 18px;
-  margin-right: 16px;
+  margin-right: 12px;
 `;
 
 const MapHeader: React.FC = () => {

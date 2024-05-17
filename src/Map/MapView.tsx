@@ -61,7 +61,6 @@ const MapView: React.FC = () => {
         if (layer === markerLayer) {
           setMarkerClicked(true);
           setModalPosition({ x: event.pixel[0], y: event.pixel[1] });
-          console.log("아ㅏㅇ아아ㅏ");
           return true;
         }
         return false;
