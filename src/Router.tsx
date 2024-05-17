@@ -4,8 +4,8 @@ import App from "./App";
 import MapView from "./Map/MapView";
 import SignUp from "./Login/SignUp";
 import Login from "./Login/Login";
-import NAuthLayout from "./InitialLayout/NAuthLayout";
-import AuthLayout from "./InitialLayout/AuthLayout";
+import NAuthLayout from "./Layout/NAuthLayout";
+import AuthLayout from "./Layout/AuthLayout";
 
 const router = createBrowserRouter([
   {

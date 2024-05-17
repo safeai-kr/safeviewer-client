@@ -6,9 +6,6 @@ import LogoutBtn from "./LogoutBtn";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
-import { useRecoilState } from "recoil";
-import { TokenProps } from "../Login/type";
-import { Tokens } from "../Recoil/Auth/Tokens";
 
 const HeaderContainer = styled.div`
   width: 100%;
@@ -38,38 +35,23 @@ const Logo = styled(FontAwesomeIcon)`
 `;
 
 const MapHeader: React.FC = () => {
-  const [cookies, , removeCookie] = useCookies([
-    "access_token_cookie",
-    "csrf_access_token",
-    "csrf_refresh_token",
-    "refresh_token_cookie",
-  ]);
-
-  const [tokens, setTokens] = useRecoilState<TokenProps>(Tokens);
-  const accessToken = cookies.csrf_access_token;
   const navigate = useNavigate();
   const logoutHandler = async () => {
     try {
-      console.log(tokens);
+      console.log(document.cookie);
+
       const response = await axios.delete(
         "https://www.samsunglife.site/auth/api/authentication/logout",
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          withCredentials: true,
         }
       );
+      alert("다시 로그인 해주세요!");
       console.log(response.data);
       navigate("/");
     } catch (e) {
       console.log(e);
     }
-    removeCookie("access_token_cookie", { path: "/" });
-    removeCookie("csrf_access_token", { path: "/" });
-    removeCookie("csrf_refresh_token", { path: "/" });
-    removeCookie("refresh_token_cookie", { path: "/" });
-    localStorage.clear();
-    sessionStorage.clear();
   };
   return (
     <HeaderContainer>
