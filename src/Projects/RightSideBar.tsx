@@ -8,7 +8,7 @@ const SideBarContainer = styled.div`
 `;
 
 const RightSideBar: React.FC = () => {
-  return <div>:React.FC</div>;
+  return <div>:RightSideBar</div>;
 };
 
 export default RightSideBar;
