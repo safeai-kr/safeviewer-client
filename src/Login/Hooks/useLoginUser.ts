@@ -22,9 +22,6 @@ const useLoginUser = () => {
     {
       //로그인 성공
       onSuccess: (res) => {
-        console.log(res.data);
-        console.log(res);
-
         alert("로그인 성공");
         setLoginId(res.data.user_id);
         //메인 페이지
