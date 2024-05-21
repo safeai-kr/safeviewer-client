@@ -73,56 +73,56 @@ const MapView: React.FC = () => {
     };
   }, [map, markerLayer]);
 
-  //View Details 클릭 시
-  useEffect(() => {
-    if (!map) return;
+  // //View Details 클릭 시
+  // useEffect(() => {
+  //   if (!map) return;
 
-    // 이미지 레이어가 이미 추가된 경우, 제거
-    if (imgLayer) {
-      map.removeLayer(imgLayer);
-      setImgLayer(undefined);
-    }
+  //   // 이미지 레이어가 이미 추가된 경우, 제거
+  //   if (imgLayer) {
+  //     map.removeLayer(imgLayer);
+  //     setImgLayer(undefined);
+  //   }
 
-    if (imgLayerOn) {
-      console.log(markerLayer);
+  //   if (imgLayerOn) {
+  //     console.log(markerLayer);
 
-      const imageExtentTransformed = [
-        ...fromLonLat([126.3, 37.2]),
-        ...fromLonLat([126.8, 37.5]),
-      ];
+  //     const imageExtentTransformed = [
+  //       ...fromLonLat([126.3, 37.2]),
+  //       ...fromLonLat([126.8, 37.5]),
+  //     ];
 
-      const newTileLayer = new TileLayer({
-        source: new XYZ({
-          url: "https://tile-server-domain/{z}/{x}/{y}.png",
-          projection: "EPSG:3857", // 사용할 좌표계
-          tileGrid: createXYZ({
-            extent: transformExtent(
-              imageExtentTransformed,
-              "EPSG:4326",
-              "EPSG:3857"
-            ),
-            maxZoom: 19,
-            tileSize: 512, // 타일 크기 설정 (옵션)
-          }),
-        }),
-      });
+  //     const newTileLayer = new TileLayer({
+  //       source: new XYZ({
+  //         url: "https://tile-server-domain/{z}/{x}/{y}.png",
+  //         projection: "EPSG:3857", // 사용할 좌표계
+  //         tileGrid: createXYZ({
+  //           extent: transformExtent(
+  //             imageExtentTransformed,
+  //             "EPSG:4326",
+  //             "EPSG:3857"
+  //           ),
+  //           maxZoom: 19,
+  //           tileSize: 512, // 타일 크기 설정 (옵션)
+  //         }),
+  //       }),
+  //     });
 
-      // newTileLayer.setZIndex(1);
-      console.log(newTileLayer);
-      map.addLayer(newTileLayer);
-      setImgLayer(newTileLayer);
-      // XYZ 소스를 변수에 할당
-      const xyzSource = newTileLayer.getSource();
+  //     // newTileLayer.setZIndex(1);
+  //     console.log(newTileLayer);
+  //     map.addLayer(newTileLayer);
+  //     setImgLayer(newTileLayer);
+  //     // XYZ 소스를 변수에 할당
+  //     const xyzSource = newTileLayer.getSource();
 
-      // 'tileloadstart' 이벤트를 사용하여 타일 로드 시작시 콘솔에 로그 출력
-      xyzSource?.on("tileloadstart", function (event) {
-        const tileCoord = event.tile.getTileCoord(); // 타일 좌표 가져오기
-        console.log(
-          `Loading tile at z: ${tileCoord[0]}, x: ${tileCoord[1]}, y: ${tileCoord[2]}`
-        );
-      });
-    }
-  }, [map, imgLayerOn]);
+  //     // 'tileloadstart' 이벤트를 사용하여 타일 로드 시작시 콘솔에 로그 출력
+  //     xyzSource?.on("tileloadstart", function (event) {
+  //       const tileCoord = event.tile.getTileCoord(); // 타일 좌표 가져오기
+  //       console.log(
+  //         `Loading tile at z: ${tileCoord[0]}, x: ${tileCoord[1]}, y: ${tileCoord[2]}`
+  //       );
+  //     });
+  //   }
+  // }, [map, imgLayerOn]);
 
   return (
     <>
@@ -135,7 +135,9 @@ const MapView: React.FC = () => {
         <Detailmodal
           setMarkerClicked={setMarkerClicked}
           modalPosition={modalPosition}
-          setImgLayerOn={setImgLayerOn}
+          // setImgLayerOn={setImgLayerOn}
+          longitude={126.62}
+          latitude={37.296}
         />
       ) : null}
     </>

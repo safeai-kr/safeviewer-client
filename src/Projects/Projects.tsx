@@ -7,6 +7,8 @@ import styled from "styled-components";
 interface DataProps {
   name: string;
   content: string;
+  longitude: number;
+  latitude: number;
 }
 const ProjectContainer = styled.div`
   position: relative;
@@ -29,11 +31,18 @@ const Projects: React.FC = () => {
     if (!initialized) {
       setTabs((prevTabs) => [
         ...prevTabs,
-        { name: data?.name, content: data?.content },
+        {
+          name: data?.name,
+          content: data?.content,
+          longitude: data?.longitude,
+          latitude: data?.latitude,
+        },
       ]);
     }
     setInitialized(true);
-    navigate(`/auth/projects/${currentTab}`);
+    navigate(`/auth/projects/${currentTab}`, {
+      state: { longitude: data?.longitude, latitude: data?.latitude },
+    });
   }, [initialized, data]);
 
   //새로 생긴 탭 선택

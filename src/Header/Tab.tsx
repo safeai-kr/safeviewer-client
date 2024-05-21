@@ -55,7 +55,9 @@ const TabContent = styled.div`
 interface tabProps {
   tabs: { name: string; content: string }[];
   setTabs: React.Dispatch<
-    React.SetStateAction<{ name: string; content: string }[]>
+    React.SetStateAction<
+      { name: string; content: string; longitude: number; latitude: number }[]
+    >
   >;
   currentTab: number;
   setCurrentTab: (index: number) => void;
