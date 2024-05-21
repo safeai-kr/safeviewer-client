@@ -43,8 +43,8 @@ const CloseBtn = styled.div`
 `;
 const ModalContents = styled.div`
   display: flex;
-  flex-direction: row; // 방향을 행으로 변경
-  align-items: center; // 내용을 센터에 맞춤
+  flex-direction: row;
+  align-items: center;
   padding: 8px;
   margin-left: 0.7rem;
 `;
