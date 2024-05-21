@@ -52,10 +52,14 @@ const TabContent = styled.div`
   align-items: center;
 `;
 interface DataProps {
-  name: string;
+  data: {
+    name: string;
+    content: string;
+  };
 }
-export const Tab = ({ name }: DataProps) => {
+export const Tab: React.FC<DataProps> = ({ data }) => {
   const [currentTab, setCurrentTab] = useState(0);
+  const { name, content } = data;
   const [menuArr, setMenuArr] = useState([
     { name },
     { name: "Custom detection" },
