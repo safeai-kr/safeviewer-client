@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 const TabMenu = styled.ul`
@@ -51,40 +52,43 @@ const TabContent = styled.div`
   display: flex;
   align-items: center;
 `;
-interface DataProps {
-  data: {
-    name: string;
-    content: string;
-  };
+interface tabProps {
+  tabs: { name: string; content: string }[];
+  setTabs: React.Dispatch<
+    React.SetStateAction<{ name: string; content: string }[]>
+  >;
+  currentTab: number;
+  setCurrentTab: (index: number) => void;
 }
-export const Tab: React.FC<DataProps> = ({ data }) => {
-  const [currentTab, setCurrentTab] = useState(0);
-  const { name, content } = data;
-  const [menuArr, setMenuArr] = useState([
-    { name },
-    { name: "Custom detection" },
-    { name: "Super resolution" },
-    { name: "Compression" },
-    { name: "Inpainting" },
-  ]);
+export const Tab: React.FC<tabProps> = ({
+  tabs,
+  setTabs,
+  currentTab,
+  setCurrentTab,
+}) => {
+  const navigate = useNavigate();
 
+  //선택된 탭 바뀔 때마다 다른 view로 라우팅
   const selectMenuHandler = (index: number) => {
-    setCurrentTab(index);
+    setCurrentTab(index + 1);
+    navigate(`/auth/projects/${index + 1}`);
   };
+
   const removeTab = (index: number) => {
-    setMenuArr(menuArr.filter((_, i) => i !== index));
-    //선택되어 있던 탭 제거되면 첫번째 탭 선택
-    if (currentTab === index && menuArr.length > 0) {
-      setCurrentTab(0);
+    setTabs((prevTabs) => prevTabs.filter((_, i) => i !== index));
+    //현재 탭을 지우면 첫번째 탭 선택되도록
+    if (currentTab === index + 1) {
+      setCurrentTab(1);
+      navigate("/auth/projects/1");
     }
   };
   return (
     <>
       <TabMenu>
-        {menuArr.map((item, index) => (
+        {tabs.map((item, index) => (
           <li
-            key={index}
-            className={index === currentTab ? "submenu focused" : "submenu"}
+            key={index + 1}
+            className={index + 1 === currentTab ? "submenu focused" : "submenu"}
             onClick={() => selectMenuHandler(index)}
           >
             <TabContent>

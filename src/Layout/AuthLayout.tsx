@@ -1,7 +1,6 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import MapHeader from "../Header/MapHeader";
-import { Tab } from "../Header/Tab";
 
 const AuthLayout: React.FC = () => {
   return (

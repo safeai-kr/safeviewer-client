@@ -72,6 +72,7 @@ const Img = styled.img`
   margin-left: 1rem;
   margin-right: 0.7rem;
 `;
+
 const DetailModal: React.FC<ModalProps> = ({
   setMarkerClicked,
   modalPosition,
