@@ -10,7 +10,7 @@ interface DataProps {
   longitude: number;
   latitude: number;
 }
-const ProjectContainer = styled.div`
+const ProjectsContainer = styled.div`
   position: relative;
   height: calc(100vh - 68px);
 `;
@@ -45,25 +45,22 @@ const Projects: React.FC = () => {
     });
   }, [initialized, data]);
 
-  //새로 생긴 탭 선택
   useEffect(() => {
+    //새로 생긴 탭 선택
     if (tabs.length > 0) {
       setCurrentTab(tabs.length);
     }
-  }, [tabs]);
-
-  //프로젝트 화면에서 다른 프로젝트를 더 추가할 때 탭 추가(예정)
-
-  //탭을 모두 지웠을 때 다시 메인화면으로
-  useEffect(() => {
+    //탭을 모두 지웠을 때 다시 메인화면으로
     if (tabs.length === 0 && !data) {
       navigate("/auth/main");
     }
   }, [tabs]);
 
+  //프로젝트 화면에서 다른 프로젝트를 더 추가할 때 탭 추가(예정)
+
   return (
     <>
-      <ProjectContainer>
+      <ProjectsContainer>
         <Tab
           tabs={tabs}
           setTabs={setTabs}
@@ -73,7 +70,7 @@ const Projects: React.FC = () => {
         {/* projectview 컴포넌트 */}
         <Outlet />
         <RightSideBar />
-      </ProjectContainer>
+      </ProjectsContainer>
     </>
   );
 };

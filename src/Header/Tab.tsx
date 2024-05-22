@@ -53,7 +53,12 @@ const TabContent = styled.div`
   align-items: center;
 `;
 interface tabProps {
-  tabs: { name: string; content: string }[];
+  tabs: {
+    name: string;
+    content: string;
+    longitude: number;
+    latitude: number;
+  }[];
   setTabs: React.Dispatch<
     React.SetStateAction<
       { name: string; content: string; longitude: number; latitude: number }[]
