@@ -71,7 +71,7 @@ const SearchIcon = styled(FontAwesomeIcon)`
   width: 16px;
   height: 16px;
 `;
-const TextArea = styled.div``;
+const OptionsArea = styled.div``;
 
 const RightSideBar: React.FC = () => {
   return (
@@ -87,7 +87,7 @@ const RightSideBar: React.FC = () => {
           <SearchInput placeholder="텍스트 영역" />
           <SearchIcon icon={faSearch} />
         </SearchBar>
-        <TextArea></TextArea>
+        <OptionsArea></OptionsArea>
       </SideBarContainer>
     </>
   );
