@@ -114,7 +114,7 @@ const DetailModal: React.FC<ModalProps> = ({
         onClick={() => {
           // setImgLayerOn(true);
           setMarkerClicked(false);
-          navigate("/auth/projects", { state: { data } });
+          navigate("/projects", { state: { data } });
         }}
       >
         View Details

@@ -40,7 +40,7 @@ const Projects: React.FC = () => {
       ]);
     }
     setInitialized(true);
-    navigate(`/auth/projects/${currentTab}`, {
+    navigate(`/projects/${currentTab}`, {
       state: { longitude: data?.longitude, latitude: data?.latitude },
     });
   }, [initialized, data]);
@@ -52,7 +52,7 @@ const Projects: React.FC = () => {
     }
     //탭을 모두 지웠을 때 다시 메인화면으로
     if (tabs.length === 0 && !data) {
-      navigate("/auth/main");
+      navigate("/");
     }
   }, [tabs]);
 

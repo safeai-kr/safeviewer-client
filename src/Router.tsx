@@ -10,23 +10,23 @@ import Projects from "./Projects/Projects";
 import ProjectView from "./Projects/ProjectView";
 
 const router = createBrowserRouter([
+  // {
+  //   path: "/",
+  //   element: <NAuthLayout />,
+  //   children: [
+  //     { path: "/", element: <Login /> },
+  //     {
+  //       path: "signup",
+  //       element: <SignUp />,
+  //     },
+  //   ],
+  // },
   {
     path: "/",
-    element: <NAuthLayout />,
-    children: [
-      { path: "/", element: <Login /> },
-      {
-        path: "signup",
-        element: <SignUp />,
-      },
-    ],
-  },
-  {
-    path: "/auth",
     element: <AuthLayout />,
     children: [
       {
-        path: "main",
+        path: "/",
         element: <MapView />,
       },
       {

@@ -6,7 +6,7 @@ import AuthLayout from "./Layout/AuthLayout";
 const App: React.FC = () => {
   return (
     <div className="App">
-      <NAuthLayout />
+      {/* <NAuthLayout /> */}
       <AuthLayout />
     </div>
   );
