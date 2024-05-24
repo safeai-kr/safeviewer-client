@@ -18,7 +18,7 @@ const TabMenu = styled.ul`
     align-items: flex-start;
     width: 256px;
     height: 40px;
-    width: calc(100% / 4);
+    width: calc(100% / 5);
     padding: 10px 10px 10px 12px;
     font-size: 15px;
     transition: 0.5s;
