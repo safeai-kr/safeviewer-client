@@ -1,4 +1,3 @@
-import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import MapView from "./Map/MapView";
@@ -7,7 +6,8 @@ import Login from "./Login/Login";
 import NAuthLayout from "./Layout/NAuthLayout";
 import AuthLayout from "./Layout/AuthLayout";
 import Projects from "./Projects/Projects";
-import ProjectView from "./Projects/ProjectView";
+import ProjectView from "./Projects/Project";
+import MainMap from "./Map/MainMap";
 
 const router = createBrowserRouter([
   // {
@@ -27,7 +27,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <MapView />,
+        element: <MainMap />,
       },
       {
         path: "projects",

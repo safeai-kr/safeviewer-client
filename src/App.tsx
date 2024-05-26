@@ -6,7 +6,7 @@ import AuthLayout from "./Layout/AuthLayout";
 const App: React.FC = () => {
   return (
     <div className="App">
-      {/* <NAuthLayout /> */}
+      {/* <NAuthLayout /> -- 로그인 로그아웃 로직 생략 */}
       <AuthLayout />
     </div>
   );

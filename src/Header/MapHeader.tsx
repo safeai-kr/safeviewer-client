@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShield, faUser } from "@fortawesome/free-solid-svg-icons";
 import LogoutBtn from "./LogoutBtn";
 import axios from "axios";
-import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 
 const HeaderContainer = styled.div`
@@ -36,6 +35,8 @@ const Logo = styled(FontAwesomeIcon)`
 
 const MapHeader: React.FC = () => {
   const navigate = useNavigate();
+
+  //로그아웃
   const logoutHandler = async () => {
     try {
       console.log(document.cookie);
