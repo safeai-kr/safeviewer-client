@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Tab } from "../Header/Tab";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import RightSideBar from "./RightSideBar";
+import RightSideBar from "./SideBar/RightSideBar";
 import styled from "styled-components";
+import Tab from "../Header/Tab";
 
 interface DataProps {
-  name: string;
-  content: string;
+  locationName: string;
+  projectName: string;
   longitude: number;
   latitude: number;
 }
@@ -14,6 +14,7 @@ const ProjectsContainer = styled.div`
   position: relative;
   height: calc(100vh - 68px);
 `;
+
 const Projects: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,8 +33,8 @@ const Projects: React.FC = () => {
       setTabs((prevTabs) => [
         ...prevTabs,
         {
-          name: data?.name,
-          content: data?.content,
+          locationName: data?.locationName,
+          projectName: data?.projectName,
           longitude: data?.longitude,
           latitude: data?.latitude,
         },
@@ -67,7 +68,7 @@ const Projects: React.FC = () => {
           currentTab={currentTab}
           setCurrentTab={setCurrentTab}
         />
-        {/* projectview 컴포넌트 */}
+        {/* project 컴포넌트 */}
         <Outlet />
         <RightSideBar />
       </ProjectsContainer>

@@ -6,8 +6,10 @@ interface ModalProps {
   setMarkerClicked: Dispatch<SetStateAction<boolean>>;
   modalPosition: { x: number; y: number };
   // setImgLayerOn: Dispatch<SetStateAction<boolean>>;
-  longitude: number;
-  latitude: number;
+  longitude?: number;
+  latitude?: number;
+  projectName?: string;
+  locationName?: string;
 }
 const ModalContainer = styled.div<{ position: { x: number; y: number } }>`
   width: 30%;
@@ -78,21 +80,24 @@ const Img = styled.img`
 const DetailModal: React.FC<ModalProps> = ({
   setMarkerClicked,
   modalPosition,
-  // setImgLayerOn,
   longitude,
   latitude,
+  projectName,
+  locationName,
 }) => {
   const navigate = useNavigate();
   const data = {
-    name: "Ship Detection(Incheon)",
-    content: "Detailed information about Ship Detection",
-    longitude: longitude,
-    latitude: latitude,
+    locationName,
+    projectName,
+    longitude,
+    latitude,
   };
   return (
     <ModalContainer position={modalPosition}>
       <ModalHeader>
-        <HeaderTxt>Ship Detection(Incheon)</HeaderTxt>
+        <HeaderTxt>
+          {data.projectName}({data.locationName})
+        </HeaderTxt>
         <CloseBtn
           onClick={() => {
             setMarkerClicked(false);
@@ -112,7 +117,6 @@ const DetailModal: React.FC<ModalProps> = ({
       </ModalContents>
       <DetailBtn
         onClick={() => {
-          // setImgLayerOn(true);
           setMarkerClicked(false);
           navigate("/projects", { state: { data } });
         }}

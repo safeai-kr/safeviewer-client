@@ -1,20 +1,30 @@
-import { Feature, Map, View } from "ol";
+import { Feature } from "ol";
 import "ol/ol.css";
 import { Icon, Style } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Point from "ol/geom/Point";
-import { fromLonLat, get } from "ol/proj";
+import { fromLonLat } from "ol/proj";
 
-interface MarkProps {
+interface MarkerProps {
   longitude: number;
   latitude: number;
+  projectName: string;
+  locationName: string;
 }
-const useMarker = ({ longitude, latitude }: MarkProps) => {
+const useMarker = (
+  markerPosition: MarkerProps[]
+): VectorLayer<VectorSource> => {
   // 마커 feature 설정
-  const feature = new Feature({
-    geometry: new Point(fromLonLat([longitude, latitude])), // 경도 위도에 포인트 설정
-    name: "point1",
+  const features = markerPosition.map((position) => {
+    const feature = new Feature({
+      geometry: new Point(fromLonLat([position.longitude, position.latitude])), // 경도 위도에 포인트 설정
+      name: "marker",
+      projectName: position.projectName,
+      locationName: position.locationName,
+    });
+
+    return feature;
   });
 
   const markerStyle = new Style({
@@ -27,7 +37,7 @@ const useMarker = ({ longitude, latitude }: MarkProps) => {
 
   // 마커 레이어에 들어갈 소스 생성
   const markerSource = new VectorSource({
-    features: [feature], // feature의 집합
+    features: features, // feature의 집합
   });
 
   // 마커 레이어 생성

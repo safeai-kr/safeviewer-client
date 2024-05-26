@@ -1,6 +1,26 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+
+interface tabProps {
+  tabs: {
+    locationName: string;
+    projectName: string;
+    longitude: number;
+    latitude: number;
+  }[];
+  setTabs: React.Dispatch<
+    React.SetStateAction<
+      {
+        locationName: string;
+        projectName: string;
+        longitude: number;
+        latitude: number;
+      }[]
+    >
+  >;
+  currentTab: number;
+  setCurrentTab: (index: number) => void;
+}
 
 const TabMenu = styled.ul`
   background-color: #3e3e3e;
@@ -18,13 +38,13 @@ const TabMenu = styled.ul`
     align-items: flex-start;
     width: 256px;
     height: 40px;
-    width: calc(100% / 5);
+    width: calc(100% / 4);
     padding: 10px 10px 10px 12px;
     font-size: 15px;
     transition: 0.5s;
   }
 
-  .focused {
+  .selected {
     background-color: #58595b;
     color: white;
   }
@@ -52,22 +72,8 @@ const TabContent = styled.div`
   display: flex;
   align-items: center;
 `;
-interface tabProps {
-  tabs: {
-    name: string;
-    content: string;
-    longitude: number;
-    latitude: number;
-  }[];
-  setTabs: React.Dispatch<
-    React.SetStateAction<
-      { name: string; content: string; longitude: number; latitude: number }[]
-    >
-  >;
-  currentTab: number;
-  setCurrentTab: (index: number) => void;
-}
-export const Tab: React.FC<tabProps> = ({
+
+const Tab: React.FC<tabProps> = ({
   tabs,
   setTabs,
   currentTab,
@@ -78,7 +84,7 @@ export const Tab: React.FC<tabProps> = ({
   //선택된 탭 바뀔 때마다 다른 view로 라우팅
   const selectMenuHandler = (index: number) => {
     setCurrentTab(index + 1);
-    navigate(`/auth/projects/${index + 1}`);
+    navigate(`/projects/${index + 1}`);
   };
 
   const removeTab = (index: number) => {
@@ -86,7 +92,7 @@ export const Tab: React.FC<tabProps> = ({
     //현재 탭을 지우면 첫번째 탭 선택되도록
     if (currentTab === index + 1) {
       setCurrentTab(1);
-      navigate("/auth/projects/1");
+      navigate("/projects/1");
     }
   };
   return (
@@ -95,12 +101,14 @@ export const Tab: React.FC<tabProps> = ({
         {tabs.map((item, index) => (
           <li
             key={index + 1}
-            className={index + 1 === currentTab ? "submenu focused" : "submenu"}
+            className={
+              index + 1 === currentTab ? "submenu selected" : "submenu"
+            }
             onClick={() => selectMenuHandler(index)}
           >
             <TabContent>
               <IndexBox>#{index + 1}</IndexBox>
-              {item.name}
+              {item.projectName}({item.locationName})
             </TabContent>
             <TabRemoveBtn
               onClick={(e) => {
@@ -117,3 +125,5 @@ export const Tab: React.FC<tabProps> = ({
     </>
   );
 };
+
+export default Tab;
