@@ -1,7 +1,7 @@
 import { RecoilRoot } from "recoil";
 import "./App.css";
-import NAuthLayout from "./Layout/NAuthLayout";
-import AuthLayout from "./Layout/AuthLayout";
+import NAuthLayout from "./Features/Layout/NAuthLayout";
+import AuthLayout from "./Features/Layout/AuthLayout";
 
 const App: React.FC = () => {
   return (

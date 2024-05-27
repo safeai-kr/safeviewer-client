@@ -4,7 +4,7 @@ import { FormValue, IdType, LoginValue, TokenProps } from "../type";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
-import { LoginUser } from "../../Recoil/Auth/LoginUser";
+import { LoginUser } from "../Data/LoginUser";
 
 const useLoginUser = () => {
   const [loginId, setLoginId] = useRecoilState<IdType>(LoginUser);

@@ -126,7 +126,12 @@ const ProjectView: React.FC = () => {
   const [dragOn, setDragOn] = useState<boolean>(false);
   const location = useLocation();
   const state = location.state as
-    | { longitude: number; latitude: number }
+    | {
+        longitude: number;
+        latitude: number;
+        locationName: string;
+        projectName: string;
+      }
     | undefined;
   // 기본값 설정
   const longitude = state?.longitude || 126.495;
@@ -153,7 +158,7 @@ const ProjectView: React.FC = () => {
 
     const initialCoordinates = fromLonLat(
       [longitude, latitude],
-      getProjection("EPSG:4326") as ProjectionLike
+      getProjection("EPSG:3857") as ProjectionLike
     );
 
     const initialView = new View({
@@ -161,7 +166,7 @@ const ProjectView: React.FC = () => {
       zoom: 16, // 초기 줌 레벨
       minZoom: 0, // 최소 줌 레벨
       maxZoom: 20, // 최대 줌 레벨
-      projection: "EPSG:4326",
+      projection: "EPSG:3857",
     });
     const tileGrid = createXYZ({
       extent: [-180, -90, 180, 90],
@@ -178,16 +183,16 @@ const ProjectView: React.FC = () => {
       target: mapRef.current,
       layers: [
         new TileLayer({
-          // source: new TileArcGISRest({
-          //   url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
-          //   //외부에서 제공된 이미지 사용을 위한 cross origin 처리
-          //   crossOrigin: "anonymous",
-          // }),
-          source: new XYZ({
-            url: "http://34.155.198.90:8080/geoserver/gwc/service/tms/1.0.0/viewer_test:viewer_test_layer@EPSG:4326@png/{z}/{x}/{y}.png",
-            projection: "EPSG:4326", // 사용할 좌표계
-            tileGrid: tileGrid,
+          source: new TileArcGISRest({
+            url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+            //외부에서 제공된 이미지 사용을 위한 cross origin 처리
+            crossOrigin: "anonymous",
           }),
+          // source: new XYZ({
+          //   url: "http://34.155.198.90:8080/geoserver/gwc/service/tms/1.0.0/viewer_test:viewer_test_layer@EPSG:4326@png/{z}/{x}/{y}.png",
+          //   projection: "EPSG:4326", // 사용할 좌표계
+          //   tileGrid: tileGrid,
+          // }),
         }),
       ],
       view: initialView,

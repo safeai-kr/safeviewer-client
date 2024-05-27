@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { FormValue } from "./type";
-import useRegisterUser from "./Hooks/useRegisterUser";
+import { FormValue } from "../Features/Login/type";
+import useRegisterUser from "../Features/Login/Hooks/useRegisterUser";
 
 const RegisterContainer = styled.div`
   border: 1px solid black;

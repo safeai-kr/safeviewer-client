@@ -42,9 +42,14 @@ const Projects: React.FC = () => {
     }
     setInitialized(true);
     navigate(`/projects/${currentTab}`, {
-      state: { longitude: data?.longitude, latitude: data?.latitude },
+      state: {
+        longitude: data?.longitude,
+        latitude: data?.latitude,
+        locationName: data?.locationName,
+        projectName: data?.projectName,
+      },
     });
-  }, [initialized, data]);
+  }, [initialized, data, navigate, currentTab]);
 
   useEffect(() => {
     //새로 생긴 탭 선택
@@ -55,7 +60,7 @@ const Projects: React.FC = () => {
     if (tabs.length === 0 && !data) {
       navigate("/");
     }
-  }, [tabs]);
+  }, [data, navigate, tabs]);
 
   //프로젝트 화면에서 다른 프로젝트를 더 추가할 때 탭 추가(예정)
 
