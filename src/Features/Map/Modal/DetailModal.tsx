@@ -118,7 +118,7 @@ const DetailModal: React.FC<ModalProps> = ({
       <DetailBtn
         onClick={() => {
           setMarkerClicked(false);
-          navigate("/projects", { state: { data } });
+          navigate("/project", { state: { data } });
         }}
       >
         View Details

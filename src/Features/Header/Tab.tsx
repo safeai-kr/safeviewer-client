@@ -1,14 +1,16 @@
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 interface tabProps {
-  tabs: {
+  tabs?: {
     locationName: string;
     projectName: string;
     longitude: number;
     latitude: number;
   }[];
-  setTabs: React.Dispatch<
+  setTabs?: React.Dispatch<
     React.SetStateAction<
       {
         locationName: string;
@@ -49,11 +51,11 @@ const TabMenu = styled.ul`
     color: white;
   }
 `;
-const TabRemoveBtn = styled.div`
+
+const TabCheckedIcon = styled(FontAwesomeIcon)`
   color: white;
   width: 16px;
   height: 16px;
-  cursor: pointer;
 `;
 const IndexBox = styled.div`
   display: flex;
@@ -87,17 +89,9 @@ const Tab: React.FC<tabProps> = ({
     navigate(`/projects/${index + 1}`);
   };
 
-  const removeTab = (index: number) => {
-    setTabs((prevTabs) => prevTabs.filter((_, i) => i !== index));
-    //현재 탭을 지우면 첫번째 탭 선택되도록
-    if (currentTab === index + 1) {
-      setCurrentTab(1);
-      navigate("/projects/1");
-    }
-  };
   return (
     <>
-      <TabMenu>
+      {/* <TabMenu>
         {tabs.map((item, index) => (
           <li
             key={index + 1}
@@ -110,18 +104,10 @@ const Tab: React.FC<tabProps> = ({
               <IndexBox>#{index + 1}</IndexBox>
               {item.projectName}({item.locationName})
             </TabContent>
-            <TabRemoveBtn
-              onClick={(e) => {
-                //부모 요소 클릭 이벤트 막기
-                e.stopPropagation();
-                removeTab(index);
-              }}
-            >
-              X
-            </TabRemoveBtn>
+            <TabCheckedIcon icon={faCheck} />
           </li>
         ))}
-      </TabMenu>
+      </TabMenu> */}
     </>
   );
 };

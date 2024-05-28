@@ -4,10 +4,10 @@ import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import "ol/ol.css";
 import { ProjectionLike, fromLonLat, get as getProjection } from "ol/proj";
-import useMarker from "../Hooks/useMarker";
-import Detailmodal from "../Modal/DetailModal";
 import styled from "styled-components";
 import { Point } from "ol/geom";
+import useMarker from "../Hooks/useMarker";
+import DetailModal from "../Modal/DetailModal";
 
 interface MarkerProps {
   longitude: number;
@@ -114,7 +114,7 @@ const MapView: React.FC = () => {
     <>
       <MapContainer ref={mapRef} />
       {markerClicked && modalPosition ? (
-        <Detailmodal
+        <DetailModal
           setMarkerClicked={setMarkerClicked}
           modalPosition={modalPosition}
           // setImgLayerOn={setImgLayerOn}

@@ -121,7 +121,7 @@ const SelectedBox = styled.div`
   z-index: 1000;
 `;
 
-const ProjectView: React.FC = () => {
+const ShipDetection: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [dragOn, setDragOn] = useState<boolean>(false);
   const location = useLocation();
@@ -183,16 +183,16 @@ const ProjectView: React.FC = () => {
       target: mapRef.current,
       layers: [
         new TileLayer({
-          source: new TileArcGISRest({
-            url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
-            //외부에서 제공된 이미지 사용을 위한 cross origin 처리
-            crossOrigin: "anonymous",
-          }),
-          // source: new XYZ({
-          //   url: "http://34.155.198.90:8080/geoserver/gwc/service/tms/1.0.0/viewer_test:viewer_test_layer@EPSG:4326@png/{z}/{x}/{y}.png",
-          //   projection: "EPSG:4326", // 사용할 좌표계
-          //   tileGrid: tileGrid,
+          // source: new TileArcGISRest({
+          //   url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+          //   //외부에서 제공된 이미지 사용을 위한 cross origin 처리
+          //   crossOrigin: "anonymous",
           // }),
+          source: new XYZ({
+            url: "http://34.155.198.90:8080/geoserver/gwc/service/tms/1.0.0/viewer_test:viewer_test_layer@EPSG:4326@png/{z}/{x}/{y}.png",
+            projection: "EPSG:3857", // 사용할 좌표계
+            tileGrid: tileGrid,
+          }),
         }),
       ],
       view: initialView,
@@ -260,10 +260,6 @@ const ProjectView: React.FC = () => {
     if (!startPoint) return;
     const rect = mapRef?.current?.getBoundingClientRect();
     if (!rect) return;
-    const size = Math.max(
-      Math.abs(e.clientX - rect.left - startPoint.x),
-      Math.abs(e.clientY - rect.top - startPoint.y)
-    );
     const width = Math.max(
       Math.abs(e.clientX - rect.left - startPoint.x),
       Math.abs(e.clientY - rect.top - startPoint.y)
@@ -405,4 +401,4 @@ const ProjectView: React.FC = () => {
   );
 };
 
-export default ProjectView;
+export default ShipDetection;

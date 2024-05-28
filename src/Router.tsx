@@ -1,13 +1,17 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import MapView from "./Features/Map/components/MapView";
-import SignUp from "./pages/SignUp";
-import Login from "./pages/Login";
+import SignUp from "./Pages/SignUp";
+import Login from "./Pages/Login";
 import NAuthLayout from "./Features/Layout/NAuthLayout";
 import AuthLayout from "./Features/Layout/AuthLayout";
-import Projects from "./Features/Projects/Projects";
-import ProjectView from "./Features/Projects/Project";
-import MainMap from "./pages/MainMap";
+import ProjectView from "./Features/Projects/CustomDetection";
+import MainMap from "./Pages/MainMap";
+import ProjectPage from "./Features/Projects/ProjectPage";
+import ShipDetection from "./Features/Projects/ShipDetection";
+import CustomDetection from "./Features/Projects/CustomDetection";
+import SuperResolution from "./Features/Projects/SuperResolution";
+import Compression from "./Features/Projects/Compression";
 
 const router = createBrowserRouter([
   // {
@@ -30,12 +34,24 @@ const router = createBrowserRouter([
         element: <MainMap />,
       },
       {
-        path: "projects",
-        element: <Projects />,
+        path: "project",
+        element: <ProjectPage />,
         children: [
           {
-            path: ":id",
-            element: <ProjectView />,
+            path: "shipdetection",
+            element: <ShipDetection />,
+          },
+          {
+            path: "customdetection",
+            element: <CustomDetection />,
+          },
+          {
+            path: "superresolution",
+            element: <SuperResolution />,
+          },
+          {
+            path: "compression",
+            element: <Compression />,
           },
         ],
       },
