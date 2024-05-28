@@ -3,7 +3,12 @@ import { Map, MapBrowserEvent, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import "ol/ol.css";
-import { ProjectionLike, fromLonLat, get as getProjection } from "ol/proj";
+import {
+  ProjectionLike,
+  fromLonLat,
+  get as getProjection,
+  toLonLat,
+} from "ol/proj";
 import styled from "styled-components";
 import { Point } from "ol/geom";
 import useMarker from "../Hooks/useMarker";
@@ -31,15 +36,15 @@ const MapView: React.FC = () => {
 
   const markerPosition = [
     {
-      longitude: 126.836794,
-      latitude: 36.961944,
-      projectName: "Custom Detection",
+      longitude: 126.6997459,
+      latitude: 36.96895395,
+      projectName: "Custom detection",
       locationName: "Pyeongtaek",
     },
     {
       longitude: 10.451526,
       latitude: 51.165691,
-      projectName: "Ship Detection",
+      projectName: "Ship detection",
       locationName: "Germany",
     },
   ];
@@ -89,9 +94,11 @@ const MapView: React.FC = () => {
           const geometry = feature.getGeometry() as Point;
           if (!geometry) return;
           const coordinates = geometry.getCoordinates();
+          const [lon, lat] = toLonLat(coordinates);
+
           setSelectedMarker({
-            longitude: coordinates[0],
-            latitude: coordinates[1],
+            longitude: lon,
+            latitude: lat,
             projectName,
             locationName,
           });

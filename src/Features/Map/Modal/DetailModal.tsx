@@ -85,6 +85,8 @@ const DetailModal: React.FC<ModalProps> = ({
   projectName,
   locationName,
 }) => {
+  console.log(longitude);
+  console.log(latitude);
   const navigate = useNavigate();
   const data = {
     locationName,

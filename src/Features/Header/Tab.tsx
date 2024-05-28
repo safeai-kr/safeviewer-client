@@ -1,27 +1,22 @@
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 interface tabProps {
-  tabs?: {
-    locationName: string;
-    projectName: string;
-    longitude: number;
-    latitude: number;
-  }[];
-  setTabs?: React.Dispatch<
-    React.SetStateAction<
-      {
-        locationName: string;
-        projectName: string;
-        longitude: number;
-        latitude: number;
-      }[]
-    >
-  >;
-  currentTab: number;
-  setCurrentTab: (index: number) => void;
+  tabs: string[];
+  // setTabs?: React.Dispatch<
+  //   React.SetStateAction<
+  //     {
+  //       locationName: string;
+  //       projectName: string;
+  //       longitude: number;
+  //       latitude: number;
+  //     }[]
+  //   >
+  // >;
+  currentTab: string;
+  // setCurrentTab: (index: number) => void;
 }
 
 const TabMenu = styled.ul`
@@ -44,6 +39,8 @@ const TabMenu = styled.ul`
     padding: 10px 10px 10px 12px;
     font-size: 15px;
     transition: 0.5s;
+    border-right: 0.2px solid #fff;
+    border-bottom: 0.2px solid #fff;
   }
 
   .selected {
@@ -52,62 +49,68 @@ const TabMenu = styled.ul`
   }
 `;
 
-const TabCheckedIcon = styled(FontAwesomeIcon)`
-  color: white;
+const TabMainIcon = styled(FontAwesomeIcon)`
+  display: flex;
   width: 16px;
   height: 16px;
+  padding: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  color: white;
+  cursor: pointer;
+  border-right: 0.2px solid #fff;
+  border-bottom: 0.2px solid #fff;
 `;
-const IndexBox = styled.div`
+const IndexBox = styled.div<{ isSelected: boolean }>`
   display: flex;
   padding: 2px 4px;
   justify-content: center;
   align-items: center;
-  color: #58595b;
-  background-color: white;
   text-align: center;
   font-size: 10px;
   font-weight: 700;
   border-radius: 4px;
   margin-right: 4px;
+  ${(props) =>
+    props.isSelected
+      ? css`
+          color: black;
+          background-color: white;
+        `
+      : css`
+          color: #58595b;
+          background-color: rgba(255, 255, 255, 0.3);
+        `}
 `;
 const TabContent = styled.div`
   display: flex;
   align-items: center;
 `;
 
-const Tab: React.FC<tabProps> = ({
-  tabs,
-  setTabs,
-  currentTab,
-  setCurrentTab,
-}) => {
+const Tab: React.FC<tabProps> = ({ tabs, currentTab }) => {
   const navigate = useNavigate();
-
-  //선택된 탭 바뀔 때마다 다른 view로 라우팅
-  const selectMenuHandler = (index: number) => {
-    setCurrentTab(index + 1);
-    navigate(`/projects/${index + 1}`);
-  };
-
   return (
     <>
-      {/* <TabMenu>
+      <TabMenu>
+        <TabMainIcon
+          icon={faGlobe}
+          onClick={() => {
+            navigate("/");
+          }}
+        />
         {tabs.map((item, index) => (
           <li
             key={index + 1}
-            className={
-              index + 1 === currentTab ? "submenu selected" : "submenu"
-            }
-            onClick={() => selectMenuHandler(index)}
+            className={item === currentTab ? "submenu selected" : "submenu"}
           >
             <TabContent>
-              <IndexBox>#{index + 1}</IndexBox>
-              {item.projectName}({item.locationName})
+              <IndexBox isSelected={item === currentTab}>#{index + 1}</IndexBox>
+              {item}
             </TabContent>
-            <TabCheckedIcon icon={faCheck} />
           </li>
         ))}
-      </TabMenu> */}
+      </TabMenu>
     </>
   );
 };

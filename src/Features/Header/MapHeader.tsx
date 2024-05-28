@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShield, faUser } from "@fortawesome/free-solid-svg-icons";
-import LogoutBtn from "./LogoutBtn";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -61,7 +60,7 @@ const MapHeader: React.FC = () => {
         <HeaderTxt>SafeViewer</HeaderTxt>
       </Contents>
       <Logo icon={faUser}></Logo>
-      <LogoutBtn onClick={logoutHandler} />
+      {/* <LogoutBtn onClick={logoutHandler} /> */}
     </HeaderContainer>
   );
 };

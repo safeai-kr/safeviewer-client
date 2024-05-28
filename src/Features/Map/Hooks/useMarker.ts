@@ -12,9 +12,7 @@ interface MarkerProps {
   projectName: string;
   locationName: string;
 }
-const useMarker = (
-  markerPosition: MarkerProps[]
-): VectorLayer<VectorSource> => {
+const useMarker = (markerPosition: MarkerProps[]) => {
   // 마커 feature 설정
   const features = markerPosition.map((position) => {
     const feature = new Feature({
