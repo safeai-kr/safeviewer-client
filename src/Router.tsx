@@ -7,7 +7,7 @@ import NAuthLayout from "./Features/Layout/NAuthLayout";
 import AuthLayout from "./Features/Layout/AuthLayout";
 import ProjectView from "./Features/Projects/CustomDetection";
 import MainMap from "./Pages/MainMap";
-import ProjectPage from "./Features/Projects/ProjectPage";
+import ProjectPage from "./Pages/ProjectPage";
 import ShipDetection from "./Features/Projects/ShipDetection";
 import CustomDetection from "./Features/Projects/CustomDetection";
 import SuperResolution from "./Features/Projects/SuperResolution";
