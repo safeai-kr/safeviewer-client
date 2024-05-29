@@ -3,6 +3,8 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import RightSideBar from "../Features/Projects/Bar/SideBar/RightSideBar";
 import styled from "styled-components";
 import Tab from "../Features/Header/Tab";
+import { CurrentProject } from "../Features/Map/Data/CurrentProject";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 interface DataProps {
   locationName: string;
@@ -18,6 +20,15 @@ const ProjectsContainer = styled.div`
 const ProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isCompression, setIsCompression] = useState<boolean>(false);
+  const currentProject = useRecoilValue<string>(CurrentProject);
+  useEffect(() => {
+    if (currentProject === "Compression") {
+      setIsCompression(true);
+    } else {
+      setIsCompression(false);
+    }
+  }, [currentProject]);
   const data = location?.state?.data as DataProps;
   //전체 탭들 목록
   const tabs = [
@@ -27,6 +38,7 @@ const ProjectPage: React.FC = () => {
     "Compression",
     "Inpainting",
   ];
+  const setCurrentProject = useSetRecoilState<string>(CurrentProject);
   const [currentTab, setCurrentTab] = useState<string>("");
 
   //메인에서 프로젝트 화면 들어갈 때 탭 추가
@@ -70,6 +82,7 @@ const ProjectPage: React.FC = () => {
       sessionStorage.setItem("longitude", data.longitude.toString());
       sessionStorage.setItem("latitude", data.latitude.toString());
       setCurrentTab(data.projectName);
+      setCurrentProject(data.projectName);
       navigate(`${data.projectName.replace(/(\s*)/g, "").toLowerCase()}`);
     } else {
       // data가 없으면 세션 스토리지에서 데이터 가져오기
@@ -77,13 +90,13 @@ const ProjectPage: React.FC = () => {
       const storedLocation = sessionStorage.getItem("location");
       const storedLongitude = sessionStorage.getItem("longitude");
       const storedLatitude = sessionStorage.getItem("latitude");
-
       if (
         storedProject &&
         storedLongitude &&
         storedLatitude &&
         storedLocation
       ) {
+        setCurrentProject(storedProject);
         setCurrentTab(storedProject);
         navigate(`${storedProject.replace(/(\s*)/g, "").toLowerCase()}`);
       } else {
@@ -102,7 +115,7 @@ const ProjectPage: React.FC = () => {
         />
         {/* project 컴포넌트들 */}
         <Outlet />
-        <RightSideBar />
+        {!isCompression && <RightSideBar />}
       </ProjectsContainer>
     </>
   );
