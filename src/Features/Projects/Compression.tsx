@@ -6,33 +6,38 @@ import OSM from "ol/source/OSM";
 import "ol/ol.css";
 import { fromLonLat, get as getProjection, ProjectionLike } from "ol/proj";
 import styled, { css } from "styled-components";
-import { TileArcGISRest, XYZ } from "ol/source";
+import { TileArcGISRest, WMTS } from "ol/source";
 
 import { transformExtent } from "ol/proj";
-import { defaults as defaultControls, Control } from "ol/control";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMinus,
-  faPlus,
-  faVectorSquare,
-  faWandMagicSparkles,
-} from "@fortawesome/free-solid-svg-icons";
+import { defaults as defaultControls } from "ol/control";
 import html2canvas from "html2canvas";
-import { createXYZ } from "ol/tilegrid";
-
+import { getWidth } from "ol/extent";
+import WMTSTileGrid from "ol/tilegrid/WMTS";
+import ToolBar from "./Bar/ToolBar";
+import ZoomBar from "./Bar/ZoomBar";
+import useCustomApi from "./API/useCustomApi";
+import { useRecoilState } from "recoil";
+import { IsCompressionModalState } from "../Map/Data/IsCompressionModalState";
+import CompressionModal from "./Modal/CompressionModal";
 interface Selection {
   x: number;
   y: number;
   width: number;
   height: number;
 }
-
-interface ProjectMapProps {
-  dragOn: boolean;
+interface Prediction {
+  label: number;
+  score: number;
+  box: [number, number, number, number]; // [x1, y1, x2, y2]
 }
 
-const ProjectMap = styled.div<ProjectMapProps>`
-  width: 77vw;
+interface ApiResponse {
+  image_url: string;
+  candidate_labels: string;
+  predictions: string; // json으로 파싱
+}
+
+const ProjectMap = styled.div`
   height: 100vh;
   position: relative;
   canvas {
@@ -42,75 +47,14 @@ const ProjectMap = styled.div<ProjectMapProps>`
   }
 `;
 
-const ToolBar = styled.div`
-  width: 56px;
-  height: 116px;
-  padding: 8px;
-  flex-wrap: wrap;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #272727;
+const DetectionBox = styled.div<{ box: [number, number, number, number] }>`
   position: absolute;
-  top: 0;
-  background: #272727;
+  border: 2px solid red;
+  left: ${({ box }) => box[0]}px;
+  top: ${({ box }) => box[1] + 68}px;
+  width: ${({ box }) => box[2] - box[0]}px;
+  height: ${({ box }) => box[3] - box[1]}px;
   z-index: 1000;
-  gap: 8px;
-`;
-const ToolButton = styled.div`
-  margin: 8px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  width: 32px;
-  margin: 0;
-  padding: 20px;
-  color: white;
-  cursor: pointer;
-  border-radius: 4px;
-`;
-
-const ToolIcon = styled(FontAwesomeIcon)`
-  color: white;
-  font-size: 20px;
-`;
-const ZoomBar = styled.div`
-  position: absolute;
-  top: 282px;
-  background: #272727;
-  z-index: 1000;
-  display: flex;
-  padding: 3px;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  width: 44px;
-  height: 88px;
-  flex-wrap: wrap;
-  border: none;
-`;
-
-const ZoomButton = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  width: 32px;
-  margin: 3px 0;
-  color: white;
-  cursor: pointer;
-`;
-
-const ZoomIcon = styled(FontAwesomeIcon)`
-  color: white;
-  font-size: 20px;
-`;
-
-const Separator = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #ccc;
 `;
 
 const SelectedBox = styled.div`
@@ -123,8 +67,12 @@ const SelectedBox = styled.div`
 
 const Compression: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [dragOn, setDragOn] = useState<boolean>(false);
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const [isCompressionModal, setIsCompressionModal] = useRecoilState<boolean>(
+    IsCompressionModalState
+  );
   const location = useLocation();
+  const mutation = useCustomApi();
   const state = location.state as
     | {
         longitude: number;
@@ -133,10 +81,11 @@ const Compression: React.FC = () => {
         projectName: string;
       }
     | undefined;
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
   // 기본값 설정
-  const longitude = state?.longitude || 126.495;
+  const longitude = state?.longitude || 126.6997459;
   // 기본값 설정 (서울 위도)
-  const latitude = state?.latitude || 37.27;
+  const latitude = state?.latitude || 36.96895395;
   const downloadLinkRef = useRef<HTMLAnchorElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
@@ -160,38 +109,45 @@ const Compression: React.FC = () => {
       [longitude, latitude],
       getProjection("EPSG:3857") as ProjectionLike
     );
-
     const initialView = new View({
       center: initialCoordinates,
-      zoom: 16, // 초기 줌 레벨
-      minZoom: 0, // 최소 줌 레벨
+      zoom: 12, // 초기 줌 레벨
+      minZoom: 10, // 최소 줌 레벨
       maxZoom: 20, // 최대 줌 레벨
       projection: "EPSG:3857",
     });
-    const tileGrid = createXYZ({
-      extent: [-180, -90, 180, 90],
-      tileSize: 256,
-      maxZoom: 20,
-    });
 
-    const imageExtentTransformed = [
-      ...fromLonLat([126.3, 37.2]),
-      ...fromLonLat([126.8, 37.5]),
-    ];
+    const projection = getProjection("EPSG:3857");
+    if (!projection) return;
+    const projectionExtent = projection.getExtent();
+    if (!projectionExtent) return;
+
+    const size = getWidth(projectionExtent) / 256;
+    const resolutions = [];
+    const matrixIds = [];
+    for (let z = 0; z < 19; ++z) {
+      resolutions[z] = size / Math.pow(2, z);
+      matrixIds[z] = "EPSG:900913:" + z;
+    }
 
     const initialMap = new Map({
       target: mapRef.current,
       layers: [
         new TileLayer({
-          // source: new TileArcGISRest({
-          //   url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
-          //   //외부에서 제공된 이미지 사용을 위한 cross origin 처리
-          //   crossOrigin: "anonymous",
-          // }),
-          source: new XYZ({
-            url: "http://34.155.198.90:8080/geoserver/gwc/service/tms/1.0.0/viewer_test:viewer_test_layer@EPSG:4326@png/{z}/{x}/{y}.png",
-            projection: "EPSG:3857", // 사용할 좌표계
-            tileGrid: tileGrid,
+          source: new WMTS({
+            url: "http://34.155.198.90:8080/geoserver/gwc/service/wmts",
+            layer: "viewer_test:Beta_with_3857_corrected",
+            matrixSet: "EPSG:900913",
+            format: "image/jpeg",
+            projection: projection,
+            tileGrid: new WMTSTileGrid({
+              origin: [-20037508.34, 20037508.34],
+              resolutions: resolutions,
+              matrixIds: matrixIds,
+            }),
+            style: "",
+            wrapX: true,
+            crossOrigin: "anonymous",
           }),
         }),
       ],
@@ -211,6 +167,33 @@ const Compression: React.FC = () => {
       }
     };
   }, []);
+
+  // //Detection API 호출
+  // const handleApiCall = () => {
+  //   const requestData = {
+  //     dataframe_split: {
+  //       columns: ["image_url", "candidate_labels"],
+  //       data: [
+  //         [
+  //           "https://cdn.klnews.co.kr/news/photo/202207/305254_45608_2249.png",
+  //           "boat",
+  //         ],
+  //       ],
+  //     },
+  //   };
+
+  //   mutation.mutate(requestData, {
+  //     onSuccess: (response) => {
+  //       console.log("API call success:", response);
+  //       const apiResponse = response.data.predictions[0] as ApiResponse;
+  //       const parsedPredictions = JSON.parse(apiResponse.predictions); //JSON.parse(): JSON 문자열을 JavaScript 객체로 변환
+  //       setPredictions(parsedPredictions);
+  //     },
+  //     onError: (error) => {
+  //       console.error("API call error:", error);
+  //     },
+  //   });
+  // };
 
   //줌 인/아웃
   const handleZoomIn = () => {
@@ -233,7 +216,7 @@ const Compression: React.FC = () => {
 
   //영역 선택 및 스크린샷 (마우스 클릭 시)
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    if (!dragOn) return;
+    if (selectedTool !== "drag") return;
     //엘리먼트의 크기와 뷰포트에 상대적인 위치 정보를 제공하는 DOMRect 객체를 반환
     const rect = mapRef?.current?.getBoundingClientRect();
     if (!rect) return;
@@ -256,7 +239,7 @@ const Compression: React.FC = () => {
 
   //마우스 클릭된 상태로 이동 시
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!dragOn) return;
+    if (selectedTool !== "drag") return;
     if (!startPoint) return;
     const rect = mapRef?.current?.getBoundingClientRect();
     if (!rect) return;
@@ -281,19 +264,13 @@ const Compression: React.FC = () => {
 
   //마우스 클릭을 뗐을 때
   const handleMouseUp = async () => {
-    if (!dragOn) return;
+    if (selectedTool !== "drag") return;
     setStartPoint(null);
     if (!selection) return;
-    // const canvas = await html2canvas(mapRef?.current, {
-    //   x: selection.x,
-    //   y: selection.y,
-    //   width: selection.width,
-    //   height: selection.height,
-    // });
+    if (selection.width === 0 || selection.height === 0) return;
 
     // 지도 캔버스 추출 (캔버스는 html요소. 그래픽 렌더링을 위한 도화지)
     const mapCanvas = mapRef.current?.querySelector("canvas");
-    console.log(mapCanvas);
     if (!mapCanvas) return;
 
     const rect = mapRef?.current?.getBoundingClientRect();
@@ -323,9 +300,8 @@ const Compression: React.FC = () => {
     );
 
     const dataUrl = croppedCanvas?.toDataURL("image/png");
-
     setScreenshotUrl(dataUrl);
-    setDragOn(false);
+    setSelectedTool(null);
 
     //지도 이동 가능
     if (map.current) {
@@ -337,45 +313,39 @@ const Compression: React.FC = () => {
 
   useEffect(() => {
     //마우스를 뗐을 때 바로 이미지 다운로드
-    if (screenshotUrl && downloadLinkRef.current) {
-      downloadLinkRef.current?.click();
+    if (isCompressionModal) {
+      // handleApiCall();
+      // downloadLinkRef.current?.click();
       //다운로드 후에 영역 해제
       setSelection(null);
+      console.log(isCompressionModal);
     }
-  }, [screenshotUrl]);
+  }, [isCompressionModal]);
+
   return (
-    <div>
-      {/* <h4>Project View for Tab {id}</h4> */}
+    <>
       <ProjectMap
         ref={mapRef}
-        dragOn={dragOn}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       >
         {view && (
           <>
-            <ToolBar>
-              <ToolButton
-                onClick={() => {
-                  setDragOn(!dragOn);
-                }}
-              >
-                <ToolIcon icon={faVectorSquare} />
-              </ToolButton>
-              <ToolButton>
-                <ToolIcon icon={faWandMagicSparkles} />
-              </ToolButton>
-            </ToolBar>
-            <ZoomBar>
-              <ZoomButton onClick={handleZoomIn}>
-                <ZoomIcon icon={faPlus} />
-              </ZoomButton>
-              <Separator />
-              <ZoomButton onClick={handleZoomOut}>
-                <ZoomIcon icon={faMinus} />
-              </ZoomButton>
-            </ZoomBar>
+            {isCompressionModal && screenshotUrl && (
+              <CompressionModal
+                url={screenshotUrl}
+                setIsCompressionModal={setIsCompressionModal}
+              />
+            )}
+            <ToolBar
+              selectedTool={selectedTool}
+              setSelectedTool={setSelectedTool}
+            />
+            <ZoomBar
+              handleZoomIn={handleZoomIn}
+              handleZoomOut={handleZoomOut}
+            />
             {selection && (
               <SelectedBox
                 style={{
@@ -386,6 +356,9 @@ const Compression: React.FC = () => {
                 }}
               />
             )}
+            {predictions.map((pred, index) => (
+              <DetectionBox key={index} box={pred.box} />
+            ))}
             <a
               ref={downloadLinkRef}
               style={{ display: "none" }}
@@ -397,7 +370,7 @@ const Compression: React.FC = () => {
           </>
         )}
       </ProjectMap>
-    </div>
+    </>
   );
 };
 

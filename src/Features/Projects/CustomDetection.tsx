@@ -23,9 +23,20 @@ interface Selection {
   width: number;
   height: number;
 }
+interface Prediction {
+  label: number;
+  score: number;
+  box: [number, number, number, number]; // [x1, y1, x2, y2]
+}
+
+interface ApiResponse {
+  image_url: string;
+  candidate_labels: string;
+  predictions: string; // json으로 파싱
+}
 
 const ProjectMap = styled.div`
-  width: 77vw;
+  width: calc(100% - 296px);
   height: 100vh;
   position: relative;
   canvas {
@@ -33,6 +44,16 @@ const ProjectMap = styled.div`
     top: 0;
     left: 0;
   }
+`;
+
+const DetectionBox = styled.div<{ box: [number, number, number, number] }>`
+  position: absolute;
+  border: 2px solid red;
+  left: ${({ box }) => box[0]}px;
+  top: ${({ box }) => box[1] + 68}px;
+  width: ${({ box }) => box[2] - box[0]}px;
+  height: ${({ box }) => box[3] - box[1]}px;
+  z-index: 1000;
 `;
 
 const SelectedBox = styled.div`
@@ -56,6 +77,7 @@ const CustomDetection: React.FC = () => {
         projectName: string;
       }
     | undefined;
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
   // 기본값 설정
   const longitude = state?.longitude || 126.6997459;
   // 기본값 설정 (서울 위도)
@@ -159,6 +181,9 @@ const CustomDetection: React.FC = () => {
     mutation.mutate(requestData, {
       onSuccess: (response) => {
         console.log("API call success:", response);
+        const apiResponse = response.data.predictions[0] as ApiResponse;
+        const parsedPredictions = JSON.parse(apiResponse.predictions); //JSON.parse(): JSON 문자열을 JavaScript 객체로 변환
+        setPredictions(parsedPredictions);
       },
       onError: (error) => {
         console.error("API call error:", error);
@@ -321,6 +346,9 @@ const CustomDetection: React.FC = () => {
                 }}
               />
             )}
+            {predictions.map((pred, index) => (
+              <DetectionBox key={index} box={pred.box} />
+            ))}
             <a
               ref={downloadLinkRef}
               style={{ display: "none" }}
