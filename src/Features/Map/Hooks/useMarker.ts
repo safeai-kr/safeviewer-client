@@ -9,8 +9,10 @@ import { fromLonLat } from "ol/proj";
 interface MarkerProps {
   longitude: number;
   latitude: number;
-  projectName: string;
+  projectName: string[];
   locationName: string;
+  country: string;
+  idNum: number[];
 }
 const useMarker = (markerPosition: MarkerProps[]) => {
   // 마커 feature 설정
@@ -20,6 +22,8 @@ const useMarker = (markerPosition: MarkerProps[]) => {
       name: "marker",
       projectName: position.projectName,
       locationName: position.locationName,
+      country: position.country,
+      idNum: position.idNum,
     });
 
     return feature;
