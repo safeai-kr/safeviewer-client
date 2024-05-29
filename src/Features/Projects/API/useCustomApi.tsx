@@ -9,7 +9,7 @@ interface ApiData {
 }
 const useCustomApi = () => {
   return useMutation((data: ApiData) => {
-    return axios.post("http://121.254.217.70:5000/invocations", data, {
+    return axios.post("/invocations", data, {
       headers: {
         "Content-Type": "application/json",
       },
