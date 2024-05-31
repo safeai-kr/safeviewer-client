@@ -219,7 +219,8 @@ const DetailModal: React.FC<ModalProps> = ({
               {longitude}, {latitude}
             </DetailTxt>
             <DetailTxt>
-              <DetailIcon icon={faSatellite} /> Satellite 23.6.18
+              <DetailIcon icon={faSatellite} />
+              Satellite 23.6.18
             </DetailTxt>
             <DetailTxt>
               <DetailIcon icon={faCalendar} />
@@ -244,7 +245,8 @@ const DetailModal: React.FC<ModalProps> = ({
               {longitude}, {latitude}
             </DetailTxt>
             <DetailTxt>
-              <DetailIcon icon={faSatellite} /> Satellite 23.6.18
+              <DetailIcon icon={faSatellite} />
+              Satellite 23.6.18
             </DetailTxt>
             <DetailTxt>
               <DetailIcon icon={faCalendar} />
