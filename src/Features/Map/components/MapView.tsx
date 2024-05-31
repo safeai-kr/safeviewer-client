@@ -117,7 +117,12 @@ const MapView: React.FC = () => {
           });
 
           setMarkerClicked(true);
-          setModalPosition({ x: event.pixel[0], y: event.pixel[1] });
+          if (mapRef.current) {
+            const { clientWidth, clientHeight } = mapRef.current;
+            console.log(clientWidth);
+            console.log(clientHeight);
+            setModalPosition({ x: clientWidth / 2.5, y: clientHeight / 3.5 });
+          }
 
           return true;
         }
