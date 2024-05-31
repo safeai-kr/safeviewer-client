@@ -295,8 +295,8 @@ const Compression: React.FC = () => {
       croppedCanvas.height,
       0,
       0,
-      selection.width,
-      selection.height
+      selection.width * scaleX,
+      selection.height * scaleY
     );
 
     const dataUrl = croppedCanvas?.toDataURL("image/png");
