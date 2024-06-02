@@ -2,18 +2,22 @@ import { useMutation } from "react-query";
 import axios from "axios";
 
 interface ApiData {
-  dataframe_split: {
-    columns: string[];
-    data: string[][];
-  };
+  image_url: string;
+  candidate_labels: string;
 }
 const useCustomApi = () => {
   return useMutation((data: ApiData) => {
-    return axios.post("/invocations", data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return axios.post(
+      "https://bento-img-classifier-cloud-run-service-rw7cysgb5a-od.a.run.app/predict",
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          // "Access-Control-Allow-Origin": "*",
+        },
+        // withCredentials: true,
+      }
+    );
   });
 };
 

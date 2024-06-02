@@ -2,7 +2,6 @@
   "name": "ol_client",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://121.254.217.70:5000",
   "homepage": "https://safeviewer.safeai.kr/",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
