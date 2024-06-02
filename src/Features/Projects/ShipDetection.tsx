@@ -143,28 +143,28 @@ const ShipDetection: React.FC = () => {
   }, []);
 
   //Detection API 호출
-  const handleApiCall = () => {
-    const requestData = {
-      dataframe_split: {
-        columns: ["image_url", "candidate_labels"],
-        data: [
-          [
-            "https://cdn.klnews.co.kr/news/photo/202207/305254_45608_2249.png",
-            "boat",
-          ],
-        ],
-      },
-    };
+  // const handleApiCall = () => {
+  //   const requestData = {
+  //     dataframe_split: {
+  //       columns: ["image_url", "candidate_labels"],
+  //       data: [
+  //         [
+  //           "https://cdn.klnews.co.kr/news/photo/202207/305254_45608_2249.png",
+  //           "boat",
+  //         ],
+  //       ],
+  //     },
+  //   };
 
-    mutation.mutate(requestData, {
-      onSuccess: (response) => {
-        console.log("API call success:", response);
-      },
-      onError: (error) => {
-        console.error("API call error:", error);
-      },
-    });
-  };
+  //   mutation.mutate(requestData, {
+  //     onSuccess: (response) => {
+  //       console.log("API call success:", response);
+  //     },
+  //     onError: (error) => {
+  //       console.error("API call error:", error);
+  //     },
+  //   });
+  // };
 
   //줌 인/아웃
   const handleZoomIn = () => {
@@ -285,7 +285,7 @@ const ShipDetection: React.FC = () => {
   useEffect(() => {
     //마우스를 뗐을 때 바로 이미지 다운로드
     if (screenshotUrl && downloadLinkRef.current) {
-      handleApiCall();
+      // handleApiCall();
       downloadLinkRef.current?.click();
 
       //다운로드 후에 영역 해제

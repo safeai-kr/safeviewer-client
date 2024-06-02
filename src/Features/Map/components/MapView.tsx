@@ -38,8 +38,8 @@ const MapView: React.FC = () => {
 
   const markerPosition = [
     {
-      longitude: 126.6997459,
-      latitude: 36.96895395,
+      longitude: 126.6175,
+      latitude: 36.9783,
       projectName: ["Ship detection", "Custom detection"],
       locationName: "Pyeongtaek port",
       country: "korea",
