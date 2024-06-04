@@ -4,7 +4,13 @@ import { Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import "ol/ol.css";
-import { fromLonLat, get as getProjection, ProjectionLike } from "ol/proj";
+import {
+  fromLonLat,
+  get as getProjection,
+  ProjectionLike,
+  transform,
+  transformExtent,
+} from "ol/proj";
 import styled from "styled-components";
 import { WMTS } from "ol/source";
 import { defaults as defaultControls } from "ol/control";
@@ -12,7 +18,7 @@ import { getTopLeft, getWidth } from "ol/extent";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
 import ToolBar from "./Bar/ToolBar";
 import ZoomBar from "./Bar/ZoomBar";
-import useCustomApi from "./API/useCustomApi";
+import useDetectionApi from "./API/useDetectionApi";
 
 interface Selection {
   x: number;
@@ -64,20 +70,16 @@ const SelectedBox = styled.div`
 const CustomDetection: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const location = useLocation();
-  const mutation = useCustomApi();
-  const state = location.state as
-    | {
-        longitude: number;
-        latitude: number;
-        locationName: string;
-        projectName: string;
-      }
-    | undefined;
+  const mutation = useDetectionApi();
+
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   // 기본값 설정
-  const longitude = state?.longitude || 126.6175;
-  const latitude = state?.latitude || 36.9783;
+  const longitude = parseFloat(
+    sessionStorage.getItem("longitude") || "126.837598615"
+  );
+  const latitude = parseFloat(
+    sessionStorage.getItem("latitude") || "36.96242917"
+  );
 
   const downloadLinkRef = useRef<HTMLAnchorElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -93,23 +95,25 @@ const CustomDetection: React.FC = () => {
   );
   //스크린샷 url
   const [screenshotUrl, setScreenshotUrl] = useState<string>("");
+  //이미지 blob객체
+  const [imageStr, setImageStr] = useState<string | "">("");
 
   //사진 레이어 추가용 state
-  const [wmtsLayer, setWmtsLayer] = useState<TileLayer<WMTS>[] | null>(null);
+  const [wmtsLayer, setWmtsLayer] = useState<TileLayer<WMTS> | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
 
     const initialCoordinates = fromLonLat(
       [longitude, latitude],
-      getProjection("EPSG:4326") as ProjectionLike
+      getProjection("EPSG:3857") as ProjectionLike
     );
     const initialView = new View({
       center: initialCoordinates,
-      zoom: 12, // 초기 줌 레벨
-      minZoom: 10, // 최소 줌 레벨
+      zoom: 14, // 초기 줌 레벨
+      minZoom: 12, // 최소 줌 레벨
       maxZoom: 19, // 최대 줌 레벨
-      projection: "EPSG:4326",
+      projection: "EPSG:3857",
     });
 
     const osmLayer = new TileLayer({
@@ -132,17 +136,17 @@ const CustomDetection: React.FC = () => {
     const addWmtsLayer = () => {
       if (!map.current) return;
 
-      const projection = getProjection("EPSG:4326");
+      const projection = getProjection("EPSG:900913");
       if (!projection) return;
       const projectionExtent = projection.getExtent();
       if (!projectionExtent) return;
 
-      const size = getWidth(projectionExtent) / 512;
+      const size = getWidth(projectionExtent) / 256;
       const resolutions = [];
       const matrixIds = [];
       for (let z = 0; z < 19; ++z) {
         resolutions[z] = size / Math.pow(2, z);
-        matrixIds[z] = `EPSG:4326:${z}`;
+        matrixIds[z] = "EPSG:900913:" + z;
       }
 
       const tileGrid = new WMTSTileGrid({
@@ -153,8 +157,8 @@ const CustomDetection: React.FC = () => {
 
       const wmtsSource = new WMTS({
         url: "http://34.155.198.90:8080/geoserver/viewer_test/gwc/service/wmts",
-        layer: "viewer_test:viewer_group_4326",
-        matrixSet: "EPSG:4326",
+        layer: "viewer_test:pyeung_fine_4326",
+        matrixSet: "EPSG:900913",
         format: "image/jpeg",
         tileGrid: tileGrid,
         style: "",
@@ -162,21 +166,17 @@ const CustomDetection: React.FC = () => {
         crossOrigin: "anonymous",
       });
 
-      // 평택항 레이어
+      //평택항 레이어
       const pyeongtaekLayer = new TileLayer({
         source: wmtsSource,
-        extent: [126.5675, 36.9283, 126.6675, 37.0283],
+        extent: transformExtent(
+          [126.82416667, 36.94940278, 126.85103056, 36.97545556],
+          "EPSG:4326",
+          "EPSG:3857"
+        ),
       });
-
-      // 룩셈부르크 레이어
-      const luxembourgLayer = new TileLayer({
-        source: wmtsSource,
-        extent: [6.161444, 49.576622, 6.261444, 49.676622],
-      });
-
       map.current.addLayer(pyeongtaekLayer);
-      map.current.addLayer(luxembourgLayer);
-      setWmtsLayer([pyeongtaekLayer, luxembourgLayer]);
+      setWmtsLayer(pyeongtaekLayer);
     };
 
     addWmtsLayer();
@@ -189,8 +189,10 @@ const CustomDetection: React.FC = () => {
 
   //Detection API 호출
   const handleApiCall = () => {
+    if (!imageStr) return;
+    console.log(imageStr);
     const requestData = {
-      image_url: "http://images.cocodataset.org/val2017/000000039769.jpg",
+      image: imageStr,
       candidate_labels: "cat",
     };
 
@@ -304,6 +306,13 @@ const CustomDetection: React.FC = () => {
     setSelection(newSelection);
   };
 
+  // 데이터 URL에서 base64 인코딩된 부분을 추출
+  const dataURLtoBase64 = (dataurl: string): string => {
+    if (!dataurl) return "";
+    const arr = dataurl.split(",");
+    return arr[1]; // base64 인코딩된 데이터 부분만 리턴
+  };
+
   const handleMapMouseUp = (e: MouseEvent<HTMLDivElement>) => {
     if (selectedTool !== "drag") return;
     setStartPoint(null);
@@ -343,20 +352,19 @@ const CustomDetection: React.FC = () => {
 
     const dataUrl = croppedCanvas?.toDataURL("image/png");
     setScreenshotUrl(dataUrl);
+    setImageStr(dataURLtoBase64(dataUrl));
   };
 
   useEffect(() => {
-    //마우스를 뗐을 때 바로 이미지 다운로드
-    if (screenshotUrl) {
-      // handleApiCall();
-      // downloadLinkRef.current?.click();
+    if (imageStr) {
+      handleApiCall();
     }
-  }, [screenshotUrl]);
+  }, [imageStr]);
 
-  //api 호출 정상적으로 작동하는지 테스트용 코드
-  useEffect(() => {
-    handleApiCall();
-  }, []);
+  // //api 호출 정상적으로 작동하는지 테스트용 코드
+  // useEffect(() => {
+  //   handleApiCall();
+  // }, []);
 
   return (
     <>
