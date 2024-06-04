@@ -170,7 +170,6 @@ const DetailModal: React.FC<ModalProps> = ({
   idNum,
 }) => {
   const navigate = useNavigate();
-  const [selectedProject, setSelectedProject] = useState<string>("");
   const [data, setData] = useState<DataType | null>(null);
 
   const handleViewClick = (projectName: string | undefined) => {
