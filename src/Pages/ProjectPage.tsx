@@ -20,13 +20,18 @@ const ProjectsContainer = styled.div`
 const ProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCompression, setIsCompression] = useState<boolean>(false);
+  const [isNotRightSideBar, setIsNotRightSideBar] = useState<boolean>(false);
   const currentProject = useRecoilValue<string>(CurrentProject);
+  const setCurrentProject = useSetRecoilState<string>(CurrentProject);
+  //프로젝트가 Compression 혹은 Super resolution이면 우측 사이드바 제거
   useEffect(() => {
-    if (currentProject === "Compression") {
-      setIsCompression(true);
+    if (
+      currentProject === "Compression" ||
+      currentProject === "Super resolution"
+    ) {
+      setIsNotRightSideBar(true);
     } else {
-      setIsCompression(false);
+      setIsNotRightSideBar(false);
     }
   }, [currentProject]);
   const data = location?.state?.data as DataProps;
@@ -38,7 +43,7 @@ const ProjectPage: React.FC = () => {
     "Compression",
     "Inpainting",
   ];
-  const setCurrentProject = useSetRecoilState<string>(CurrentProject);
+
   const [currentTab, setCurrentTab] = useState<string>("");
 
   //메인에서 프로젝트 화면 들어갈 때 탭 추가
@@ -74,6 +79,7 @@ const ProjectPage: React.FC = () => {
   //   }
   // }, [data, navigate, tabs]);
 
+  // 새로고침 시에 화면 유지되도록 세션스토리지 활용
   useEffect(() => {
     if (data) {
       // data가 존재하면 세션 스토리지에 저장
@@ -115,7 +121,7 @@ const ProjectPage: React.FC = () => {
         />
         {/* project 컴포넌트들 */}
         <Outlet />
-        {!isCompression && <RightSideBar />}
+        {!isNotRightSideBar && <RightSideBar />}
       </ProjectsContainer>
     </>
   );
