@@ -72,10 +72,8 @@ const ImgContainer = styled.div`
 `;
 
 const ImgCompress = styled.img`
-  max-width: 400px;
-  max-height: 400px;
-  width: auto;
-  height: auto;
+  width: 400px;
+  height: 400px;
   object-fit: contain;
 `;
 
