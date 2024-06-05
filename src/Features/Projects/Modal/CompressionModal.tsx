@@ -1,6 +1,6 @@
 import { faArrowRight, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
 interface ModalProps {
@@ -200,6 +200,52 @@ const CompressionModal: React.FC<ModalProps> = ({
   url,
   setIsCompressionModal,
 }) => {
+  const [croppedUrl, setCroppedUrl] = useState<string>("");
+
+  //이미지의 가운데 부분을 임의로 잘라서 정사각형 형태로 캔버스를 그리고 그 잘린 정사각형 이미지를 모달에 띄움
+  useEffect(() => {
+    const image = new Image();
+    image.src = url;
+    //image가 성공적으로 로딩 되었을 때
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      if (!context) return;
+
+      // 이미지의 중심점
+      const centerX = image.width / 2;
+      const centerY = image.height / 2;
+
+      // 너비와 높이 중 더 작은 값을 기준으로 크롭할 크기 계산
+      const cropSize = Math.min(image.width, image.height);
+
+      // 크롭할 사각형의 시작점 계산
+      const startX = centerX - cropSize / 2;
+      const startY = centerY - cropSize / 2;
+
+      // 캔버스 크기 설정
+      canvas.width = 400;
+      canvas.height = 400;
+
+      // 이미지의 크롭된 영역을 캔버스에 그리기
+      context.drawImage(
+        image,
+        startX,
+        startY,
+        cropSize,
+        cropSize,
+        0,
+        0,
+        400,
+        400
+      );
+
+      // 새로운 이미지 URL 생성
+      setCroppedUrl(canvas.toDataURL("image/png"));
+    };
+  }, [url]);
+
   return (
     <ModalBackground onClick={() => setIsCompressionModal(false)}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
@@ -209,9 +255,9 @@ const CompressionModal: React.FC<ModalProps> = ({
         </ModalHeader>
         <ModalContents>
           <ImgContainer>
-            <ImgCompress src={url} alt="Screenshot" />
+            <ImgCompress src={croppedUrl} alt="Screenshot" />
             <ArrowIcon icon={faArrowRight} />
-            <ImgCompress src={url} alt="Screenshot" />
+            <ImgCompress src={croppedUrl} alt="Screenshot" />
           </ImgContainer>
           <RightContents>
             <RightBox>
