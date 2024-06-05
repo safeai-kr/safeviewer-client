@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Tab from "../Features/Header/Tab";
+import { CurrentProject } from "../Features/Map/Data/CurrentProject";
+import { useSetRecoilState } from "recoil";
 
 interface DataProps {
   locationName: string;
@@ -27,7 +29,7 @@ const ProjectPage: React.FC = () => {
     "Compression",
     "Inpainting",
   ];
-
+  const setCurrentProject = useSetRecoilState<string>(CurrentProject);
   const [currentTab, setCurrentTab] = useState<string>("");
 
   //메인에서 프로젝트 화면 들어갈 때 탭 추가
@@ -72,6 +74,8 @@ const ProjectPage: React.FC = () => {
       sessionStorage.setItem("longitude", data.longitude.toString());
       sessionStorage.setItem("latitude", data.latitude.toString());
       setCurrentTab(data.projectName);
+      setCurrentProject(data.projectName);
+
       navigate(`${data.projectName.replace(/(\s*)/g, "").toLowerCase()}`);
     } else {
       // data가 없으면 세션 스토리지에서 데이터 가져오기
@@ -86,6 +90,8 @@ const ProjectPage: React.FC = () => {
         storedLocation
       ) {
         setCurrentTab(storedProject);
+        setCurrentProject(storedProject);
+
         navigate(`${storedProject.replace(/(\s*)/g, "").toLowerCase()}`);
       } else {
         navigate("/"); // 세션 스토리지에도 데이터가 없으면 메인 화면으로 이동

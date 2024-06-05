@@ -11,7 +11,7 @@ import {
   transform,
   transformExtent,
 } from "ol/proj";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { WMTS } from "ol/source";
 import { defaults as defaultControls } from "ol/control";
 import { getTopLeft, getWidth } from "ol/extent";
@@ -19,7 +19,8 @@ import WMTSTileGrid from "ol/tilegrid/WMTS";
 import ToolBar from "./Bar/ToolBar";
 import ZoomBar from "./Bar/ZoomBar";
 import useDetectionApi from "./API/useDetectionApi";
-import RightSideBar from "./Bar/SideBar/RightSideBar";
+import CustomRightSideBar from "./Bar/SideBar/CustomRightSideBar";
+import SelectionCloseBtn from "./Component/SelectionCloseBtn";
 
 interface Selection {
   x: number;
@@ -50,6 +51,39 @@ const ProjectMap = styled.div`
   }
 `;
 
+//before 가상 요소는 선택된 영역의 크기와 위치를 지정하고, box-shadow를 사용하여 선택된 영역 외부를 어둡게 만듭니다.
+//after 가상 요소는 부모 요소 전체를 덮는 투명한 레이어를 만들어 선택된 영역이 아닌 부분을 덮습니다.
+const BlurScreen = styled.div<{ selection: Selection | null }>`
+  ${({ selection }) =>
+    selection &&
+    css`
+      //선택한 영역
+      &:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2.5px);
+        clip-path: polygon(
+          0% 0%,
+          0% 100%,
+          ${selection.x}px 100%,
+          ${selection.x}px ${selection.y}px,
+          ${selection.x + selection.width}px ${selection.y}px,
+          ${selection.x + selection.width}px ${selection.y + selection.height}px,
+          ${selection.x}px ${selection.y + selection.height}px,
+          ${selection.x}px 100%,
+          100% 100%,
+          100% 0%
+        );
+        z-index: 999;
+      }
+    `}
+`;
+
 const DetectionBox = styled.div<{ box: [number, number, number, number] }>`
   position: absolute;
   border: 2px solid red;
@@ -62,10 +96,10 @@ const DetectionBox = styled.div<{ box: [number, number, number, number] }>`
 
 const SelectedBox = styled.div`
   position: absolute;
-  border: 2px dashed #000;
-  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid #fff;
   pointer-events: none;
   z-index: 1000;
+  box-shadow: 4px 4px 10px 0px rgba(0, 0, 0, 0.6);
 `;
 
 const CustomDetection: React.FC = () => {
@@ -90,6 +124,9 @@ const CustomDetection: React.FC = () => {
 
   //선택된 영역
   const [selection, setSelection] = useState<Selection | null>(null);
+  //선택이 완료되었는 지에 대한 상태
+  const [isSelected, setIsSelected] = useState<boolean>(false);
+
   //마우스 클릭 지점(스크린샷 시작 지점)
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(
     null
@@ -247,6 +284,7 @@ const CustomDetection: React.FC = () => {
           clickY > selection.y + selection.height
         ) {
           setSelection(null);
+          setIsSelected(false);
           setSelectedTool(null);
           if (map.current) {
             map.current.getInteractions().forEach((interaction) => {
@@ -355,8 +393,22 @@ const CustomDetection: React.FC = () => {
     const dataUrl = croppedCanvas?.toDataURL("image/png");
     setScreenshotUrl(dataUrl);
     setImageStr(dataURLtoBase64(dataUrl));
+    setIsSelected(true);
   };
 
+  //선택된 영역 우상단 X 버튼 클릭 시
+  const handleCloseSelection = () => {
+    setSelection(null);
+    setIsSelected(false);
+    setSelectedTool(null);
+    if (map.current) {
+      map.current.getInteractions().forEach((interaction) => {
+        interaction.setActive(true);
+      });
+    }
+  };
+
+  //영역 지정하면 api호출
   useEffect(() => {
     if (imageStr) {
       handleApiCall();
@@ -376,6 +428,7 @@ const CustomDetection: React.FC = () => {
         onMouseMove={handleMapMouseMove}
         onMouseUp={handleMapMouseUp}
       >
+        <BlurScreen selection={isSelected ? selection : null} />
         {view && (
           <>
             <ToolBar
@@ -387,14 +440,25 @@ const CustomDetection: React.FC = () => {
               handleZoomOut={handleZoomOut}
             />
             {selection !== null && (
-              <SelectedBox
-                style={{
-                  left: selection.x,
-                  top: selection.y,
-                  width: selection.width,
-                  height: selection.height,
-                }}
-              />
+              <>
+                <SelectedBox
+                  style={{
+                    left: selection.x,
+                    top: selection.y,
+                    width: selection.width,
+                    height: selection.height,
+                  }}
+                />
+                {isSelected && (
+                  <SelectionCloseBtn
+                    position={{
+                      right: selection.x + selection.width,
+                      top: selection.y,
+                    }}
+                    onClose={handleCloseSelection}
+                  />
+                )}
+              </>
             )}
             <a
               ref={downloadLinkRef}
@@ -407,7 +471,8 @@ const CustomDetection: React.FC = () => {
           </>
         )}
       </ProjectMap>
-      <RightSideBar />
+
+      <CustomRightSideBar />
     </>
   );
 };
