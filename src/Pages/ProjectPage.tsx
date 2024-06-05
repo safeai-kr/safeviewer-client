@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import RightSideBar from "../Features/Projects/Bar/SideBar/RightSideBar";
 import styled from "styled-components";
 import Tab from "../Features/Header/Tab";
-import { CurrentProject } from "../Features/Map/Data/CurrentProject";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 interface DataProps {
   locationName: string;
@@ -20,20 +17,7 @@ const ProjectsContainer = styled.div`
 const ProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isNotRightSideBar, setIsNotRightSideBar] = useState<boolean>(false);
-  const currentProject = useRecoilValue<string>(CurrentProject);
-  const setCurrentProject = useSetRecoilState<string>(CurrentProject);
-  //프로젝트가 Compression 혹은 Super resolution이면 우측 사이드바 제거
-  useEffect(() => {
-    if (
-      currentProject === "Compression" ||
-      currentProject === "Super resolution"
-    ) {
-      setIsNotRightSideBar(true);
-    } else {
-      setIsNotRightSideBar(false);
-    }
-  }, [currentProject]);
+
   const data = location?.state?.data as DataProps;
   //전체 탭들 목록
   const tabs = [
@@ -88,7 +72,6 @@ const ProjectPage: React.FC = () => {
       sessionStorage.setItem("longitude", data.longitude.toString());
       sessionStorage.setItem("latitude", data.latitude.toString());
       setCurrentTab(data.projectName);
-      setCurrentProject(data.projectName);
       navigate(`${data.projectName.replace(/(\s*)/g, "").toLowerCase()}`);
     } else {
       // data가 없으면 세션 스토리지에서 데이터 가져오기
@@ -102,7 +85,6 @@ const ProjectPage: React.FC = () => {
         storedLatitude &&
         storedLocation
       ) {
-        setCurrentProject(storedProject);
         setCurrentTab(storedProject);
         navigate(`${storedProject.replace(/(\s*)/g, "").toLowerCase()}`);
       } else {
