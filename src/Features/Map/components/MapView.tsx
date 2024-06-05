@@ -76,7 +76,7 @@ const MapView: React.FC = () => {
 
     const initialView = new View({
       center: fromLonLat(
-        [126.752, 37.4713],
+        [127.0016985, 37.0642135],
         getProjection("EPSG:3857") as ProjectionLike
       ),
       zoom: 2,
@@ -148,8 +148,8 @@ const MapView: React.FC = () => {
                     const { clientWidth, clientHeight } = mapRef.current;
                     //modal 위치를 화면 정중앙으로
                     setModalPosition({
-                      x: clientWidth / 2.5,
-                      y: clientHeight / 3.5,
+                      x: clientWidth / 1.85,
+                      y: clientHeight / 3,
                     });
                     setMarkerClicked(true);
                   }

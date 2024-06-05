@@ -67,14 +67,14 @@ const CustomDetection: React.FC = () => {
     if (!mapRef.current) return;
 
     const initialCoordinates = fromLonLat(
-      [longitude, latitude],
+      [longitude, latitude - 0.002],
       getProjection("EPSG:3857") as ProjectionLike
     );
     const initialView = new View({
       center: initialCoordinates,
-      zoom: 16, // 초기 줌 레벨
-      minZoom: 12, // 최소 줌 레벨
-      maxZoom: 19, // 최대 줌 레벨
+      zoom: 12, // 초기 줌 레벨
+      minZoom: 16, // 최소 줌 레벨
+      maxZoom: 21, // 최대 줌 레벨
       projection: "EPSG:3857",
     });
 

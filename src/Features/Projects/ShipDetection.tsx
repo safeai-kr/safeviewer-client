@@ -18,6 +18,7 @@ import WMTSTileGrid from "ol/tilegrid/WMTS";
 import ToolBar from "./Bar/ToolBar";
 import ZoomBar from "./Bar/ZoomBar";
 import useDetectionApi from "./API/useDetectionApi";
+import RightSideBar from "./Bar/SideBar/RightSideBar";
 
 interface Selection {
   x: number;
@@ -104,14 +105,14 @@ const ShipDetection: React.FC = () => {
     if (!mapRef.current) return;
 
     const initialCoordinates = fromLonLat(
-      [longitude, latitude],
+      [longitude, latitude - 0.01],
       getProjection("EPSG:3857") as ProjectionLike
     );
     const initialView = new View({
       center: initialCoordinates,
       zoom: 14, // 초기 줌 레벨
       minZoom: 12, // 최소 줌 레벨
-      maxZoom: 19, // 최대 줌 레벨
+      maxZoom: 21, // 최대 줌 레벨
       projection: "EPSG:3857",
     });
 
@@ -286,21 +287,11 @@ const ShipDetection: React.FC = () => {
     const rect = mapRef?.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const width = Math.max(
-      Math.abs(e.clientX - rect.left - startPoint.x),
-      Math.abs(e.clientY - rect.top - startPoint.y)
-    );
-    const height = Math.max(
-      Math.abs(e.clientX - rect.left - startPoint.x),
-      Math.abs(e.clientY - rect.top - startPoint.y)
-    );
-
-    //width와 height 동일하게 해서 정사각형으로!
     const newSelection = {
-      x: Math.min(startPoint.x, startPoint.x + width),
-      y: Math.min(startPoint.y, startPoint.y + height),
-      width: width,
-      height: height,
+      x: Math.min(startPoint.x, e.clientX - rect.left),
+      y: Math.min(startPoint.y, e.clientY - rect.top),
+      width: Math.abs(e.clientX - rect.left - startPoint.x), //양수가 되도록 절대값 처리
+      height: Math.abs(e.clientY - rect.top - startPoint.y),
     };
 
     //실제 영역 설정
@@ -408,6 +399,7 @@ const ShipDetection: React.FC = () => {
           </>
         )}
       </ProjectMap>
+      <RightSideBar />
     </>
   );
 };
