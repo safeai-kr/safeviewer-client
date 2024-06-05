@@ -121,7 +121,6 @@ const ProjectPage: React.FC = () => {
         />
         {/* project 컴포넌트들 */}
         <Outlet />
-        {!isNotRightSideBar && <RightSideBar />}
       </ProjectsContainer>
     </>
   );
