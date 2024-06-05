@@ -148,7 +148,7 @@ const MapView: React.FC = () => {
                     const { clientWidth, clientHeight } = mapRef.current;
                     //modal 위치를 화면 정중앙으로
                     setModalPosition({
-                      x: clientWidth / 1.85,
+                      x: clientWidth / 2.1,
                       y: clientHeight / 3,
                     });
                     setMarkerClicked(true);

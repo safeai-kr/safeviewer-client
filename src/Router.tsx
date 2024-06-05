@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
-import MapView from "./Features/Map/components/MapView";
+import MapView from "./Features/Map/Component/MapView";
 import SignUp from "./Pages/SignUp";
 import Login from "./Pages/Login";
 import NAuthLayout from "./Features/Layout/NAuthLayout";
