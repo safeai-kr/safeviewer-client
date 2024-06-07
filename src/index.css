@@ -18,13 +18,21 @@ body {
 }
 
 body {
-  width: 1280px;
-  height: 720px;
   overflow: hidden; /* 스크롤바가 나타나지 않도록 설정 */
   background-color: white; /* body 배경색 설정 */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   position: relative;
   display: block;
+}
+
+/* 더 큰 해상도에 대한 설정 */
+/* 1920픽셀이라면 100vw / 1280는 1920 / 1280 = 1.5 -> 1.5배 확대*/
+@media (min-width: 1281px) and (min-height: 721px) {
+  html,
+  body {
+    transform: scale(calc(min(100vw / 1280, 100vh / 720)));
+    transform-origin: top left;
+  }
 }
 
 code {
