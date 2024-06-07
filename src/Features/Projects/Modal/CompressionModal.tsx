@@ -6,6 +6,7 @@ import styled from "styled-components";
 interface ModalProps {
   url: string;
   setIsCompressionModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSaveClicked: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ModalBackground = styled.div`
@@ -199,6 +200,7 @@ const SaveButton = styled.button`
 const CompressionModal: React.FC<ModalProps> = ({
   url,
   setIsCompressionModal,
+  setIsSaveClicked,
 }) => {
   const [croppedUrl, setCroppedUrl] = useState<string>("");
 
@@ -246,6 +248,13 @@ const CompressionModal: React.FC<ModalProps> = ({
     };
   }, [url]);
 
+  const handleSaveClick = () => {
+    setIsCompressionModal(false);
+    setIsSaveClicked(true);
+    setTimeout(() => {
+      setIsSaveClicked(false);
+    }, 2000);
+  };
   return (
     <ModalBackground onClick={() => setIsCompressionModal(false)}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
@@ -282,7 +291,7 @@ const CompressionModal: React.FC<ModalProps> = ({
                 The picture quality is the same
               </Txt>
             </TxtBox>
-            <SaveButton>Save</SaveButton>
+            <SaveButton onClick={handleSaveClick}>Save</SaveButton>
           </RightContents>
         </ModalContents>
       </ModalContainer>
