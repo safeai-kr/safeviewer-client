@@ -104,7 +104,7 @@ const ProjectPage: React.FC = () => {
       <ProjectsContainer>
         <Tab
           tabs={tabs}
-          // setTabs={setTabs}
+          setCurrentTab={setCurrentTab}
           currentTab={currentTab}
         />
         {/* project 컴포넌트들 */}
