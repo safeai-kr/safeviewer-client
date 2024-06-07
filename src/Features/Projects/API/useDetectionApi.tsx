@@ -2,13 +2,13 @@ import { useMutation } from "react-query";
 import axios from "axios";
 
 interface ApiData {
-  image: string | null;
+  image_base64: string | null;
   candidate_labels: string;
 }
 const useDetectionApi = () => {
   return useMutation((data: ApiData) => {
     return axios.post(
-      "https://bento-img-classifier-cloud-run-service-rw7cysgb5a-od.a.run.app/predict",
+      "https://bento-img-classifier-cloud-run-service-rw7cysgb5a-od.a.run.app/predict/detection",
       data,
       {
         headers: {
