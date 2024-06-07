@@ -2,7 +2,9 @@ import { faCheck, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useRecoilState } from "recoil";
 import styled, { css } from "styled-components";
+import { CurrentProject } from "../Map/Data/CurrentProject";
 
 interface tabProps {
   tabs: string[];
@@ -42,7 +44,6 @@ const TabMenu = styled.ul`
     font-size: 15px;
     transition: 0.5s;
     border-right: 0.2px solid #fff;
-    border-bottom: 0.2px solid #fff;
   }
 
   .selected {
@@ -61,7 +62,6 @@ const TabMainIcon = styled(FontAwesomeIcon)`
   flex-shrink: 0;
   color: white;
   border-right: 0.2px solid #fff;
-  border-bottom: 0.2px solid #fff;
 `;
 const IndexBox = styled.div<{ isSelected: boolean }>`
   display: flex;
@@ -91,6 +91,8 @@ const TabContent = styled.div`
 
 const Tab: React.FC<tabProps> = ({ tabs, currentTab, setCurrentTab }) => {
   const navigate = useNavigate();
+  const [currentProject, setCurrentProject] =
+    useRecoilState<string>(CurrentProject);
   return (
     <>
       <TabMenu>
@@ -105,6 +107,7 @@ const Tab: React.FC<tabProps> = ({ tabs, currentTab, setCurrentTab }) => {
             onClick={() => {
               navigate(`/project/${item.replace(/(\s*)/g, "").toLowerCase()}`);
               setCurrentTab(item);
+              setCurrentProject(item);
             }}
             key={index + 1}
             className={item === currentTab ? "submenu selected" : "submenu"}
