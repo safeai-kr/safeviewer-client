@@ -42,19 +42,30 @@ const ProjectMap = styled.div`
   }
 `;
 
-const CustomDetection: React.FC = () => {
+const SuperResolution: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const mutation = useCustomApi();
 
   // 기본값 설정
-  const longitude = parseFloat(
-    sessionStorage.getItem("longitude") || "6.230747225"
-  );
-  const latitude = parseFloat(
-    sessionStorage.getItem("latitude") || "49.63796111"
-  );
+  const [longitude, setLongitude] = useState<number>(6.230747225);
+  const [latitude, setLatitude] = useState<number>(49.63796111);
+  useEffect(() => {
+    setLongitude(
+      parseFloat(sessionStorage.getItem("longitude") || "6.23097225")
+    );
+    setLatitude(
+      parseFloat(sessionStorage.getItem("latitude") || "49.63796111")
+    );
+  }, []);
 
+  //탭으로 이동 시에 평택에서 넘어오면 위/경도 룩셈부르크 공항으로 지정
+  useEffect(() => {
+    if (sessionStorage.getItem("location") !== "Luxembourg Airport") {
+      setLongitude(6.230747225);
+      setLatitude(49.63796111);
+    }
+  }, [longitude, latitude]);
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
 
@@ -118,7 +129,7 @@ const CustomDetection: React.FC = () => {
       });
 
       const wmtsSource = new WMTS({
-        url: "http://34.155.198.90:8080/geoserver/viewer_test/gwc/service/wmts",
+        url: "https://gsapi.safeai.kr/geoserver/viewer_test/gwc/service/wmts",
         layer: "viewer_test:luxem_fine_4326",
         matrixSet: "EPSG:900913",
         format: "image/jpeg",
@@ -214,4 +225,4 @@ const CustomDetection: React.FC = () => {
   );
 };
 
-export default CustomDetection;
+export default SuperResolution;

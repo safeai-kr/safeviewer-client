@@ -109,12 +109,24 @@ const CustomDetection: React.FC = () => {
 
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   // 기본값 설정
-  const longitude = parseFloat(
-    sessionStorage.getItem("longitude") || "126.837598615"
-  );
-  const latitude = parseFloat(
-    sessionStorage.getItem("latitude") || "36.96242917"
-  );
+  const [longitude, setLongitude] = useState<number>(126.837598615);
+  const [latitude, setLatitude] = useState<number>(36.96242917);
+  useEffect(() => {
+    setLongitude(
+      parseFloat(sessionStorage.getItem("longitude") || "126.837598615")
+    );
+    setLatitude(
+      parseFloat(sessionStorage.getItem("latitude") || "36.96242917")
+    );
+  }, []);
+
+  //탭으로 이동 시에 평택에서 넘어오면 위/경도 룩셈부르크 공항으로 지정
+  useEffect(() => {
+    if (sessionStorage.getItem("location") !== "Luxembourg Airport") {
+      setLongitude(126.837598615);
+      setLatitude(36.96242917);
+    }
+  }, [longitude, latitude]);
 
   const downloadLinkRef = useRef<HTMLAnchorElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -194,7 +206,7 @@ const CustomDetection: React.FC = () => {
       });
 
       const wmtsSource = new WMTS({
-        url: "http://34.155.198.90:8080/geoserver/viewer_test/gwc/service/wmts",
+        url: "https://gsapi.safeai.kr/geoserver/viewer_test/gwc/service/wmts",
         layer: "viewer_test:pyeung_fine_4326",
         matrixSet: "EPSG:900913",
         format: "image/jpeg",
@@ -228,10 +240,10 @@ const CustomDetection: React.FC = () => {
   //Detection API 호출
   const handleApiCall = () => {
     if (!imageStr) return;
-    console.log(imageStr);
+    // console.log(imageStr);
     const requestData = {
-      image: imageStr,
-      candidate_labels: "cat",
+      image_base64: imageStr,
+      candidate_labels: "boat",
     };
 
     mutation.mutate(requestData, {

@@ -1,5 +1,6 @@
 import { faCheck, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { css } from "styled-components";
 
@@ -16,7 +17,7 @@ interface tabProps {
   //   >
   // >;
   currentTab: string;
-  // setCurrentTab: (index: number) => void;
+  setCurrentTab: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const TabMenu = styled.ul`
@@ -29,6 +30,7 @@ const TabMenu = styled.ul`
   margin: 0;
   padding: 0;
 
+  cursor: pointer;
   .submenu {
     display: flex;
     justify-content: space-between;
@@ -58,7 +60,6 @@ const TabMainIcon = styled(FontAwesomeIcon)`
   align-items: center;
   flex-shrink: 0;
   color: white;
-  cursor: pointer;
   border-right: 0.2px solid #fff;
   border-bottom: 0.2px solid #fff;
 `;
@@ -88,7 +89,7 @@ const TabContent = styled.div`
   align-items: center;
 `;
 
-const Tab: React.FC<tabProps> = ({ tabs, currentTab }) => {
+const Tab: React.FC<tabProps> = ({ tabs, currentTab, setCurrentTab }) => {
   const navigate = useNavigate();
   return (
     <>
@@ -101,6 +102,10 @@ const Tab: React.FC<tabProps> = ({ tabs, currentTab }) => {
         />
         {tabs.map((item, index) => (
           <li
+            onClick={() => {
+              navigate(`/project/${item.replace(/(\s*)/g, "").toLowerCase()}`);
+              setCurrentTab(item);
+            }}
             key={index + 1}
             className={item === currentTab ? "submenu selected" : "submenu"}
           >

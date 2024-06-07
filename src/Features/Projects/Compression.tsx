@@ -21,6 +21,7 @@ import { IsCompressionModalState } from "../Map/Data/IsCompressionModalState";
 import CompressionModal from "./Modal/CompressionModal";
 import useCompressionApi from "./API/useCompressionApi";
 import SelectionCloseBtn from "./Component/SelectionCloseBtn";
+import SavedModal from "./Modal/SavedModal";
 interface Selection {
   x: number;
   y: number;
@@ -109,12 +110,25 @@ const Compression: React.FC = () => {
   );
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   // 기본값 설정
-  const longitude = parseFloat(
-    sessionStorage.getItem("longitude") || "6.230747225"
-  );
-  const latitude = parseFloat(
-    sessionStorage.getItem("latitude") || "49.63796111"
-  );
+  const [longitude, setLongitude] = useState<number>(6.230747225);
+  const [latitude, setLatitude] = useState<number>(49.63796111);
+
+  useEffect(() => {
+    setLongitude(
+      parseFloat(sessionStorage.getItem("longitude") || "6.23097225")
+    );
+    setLatitude(
+      parseFloat(sessionStorage.getItem("latitude") || "49.63796111")
+    );
+  }, []);
+
+  //탭으로 이동 시에 평택에서 넘어오면 위/경도 룩셈부르크 공항으로 지정
+  useEffect(() => {
+    if (sessionStorage.getItem("location") !== "Luxembourg Airport") {
+      setLongitude(6.230747225);
+      setLatitude(49.63796111);
+    }
+  }, [longitude, latitude]);
 
   const downloadLinkRef = useRef<HTMLAnchorElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -132,8 +146,11 @@ const Compression: React.FC = () => {
   );
   //스크린샷 url
   const [screenshotUrl, setScreenshotUrl] = useState<string>("");
-  //이미지 blob객체
-  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  //이미지 base64인코딩 string
+  const [imageStr, setImageStr] = useState<string | "">("");
+
+  //모달 내 save button 클릭 state
+  const [isSaveClicked, setIsSaveClicked] = useState<boolean>(false);
 
   //사진 레이어 추가용 state
   const [wmtsLayer, setWmtsLayer] = useState<TileLayer<WMTS> | null>(null);
@@ -193,7 +210,7 @@ const Compression: React.FC = () => {
       });
 
       const wmtsSource = new WMTS({
-        url: "http://34.155.198.90:8080/geoserver/viewer_test/gwc/service/wmts",
+        url: "https://gsapi.safeai.kr/geoserver/viewer_test/gwc/service/wmts",
         layer: "viewer_test:luxem_fine_4326",
         matrixSet: "EPSG:900913",
         format: "image/jpeg",
@@ -227,10 +244,9 @@ const Compression: React.FC = () => {
 
   //Detection API 호출
   const handleApiCall = () => {
-    if (!imageBlob) return;
+    if (!imageStr) return;
     const requestData = {
-      bucket: "viewer-models-artifacts",
-      image: imageBlob,
+      image_base64: imageStr,
     };
 
     mutation.mutate(requestData, {
@@ -334,27 +350,11 @@ const Compression: React.FC = () => {
     setSelection(newSelection);
   };
 
-  //데이터 url을 blob 객체로 변환
-  const dataURLtoBlob = (dataurl: string): Blob | null => {
-    if (!dataurl) return null;
-    //MIME 타입과 실제 데이터 분리
+  // 데이터 URL에서 base64 인코딩된 부분을 추출
+  const dataURLtoBase64 = (dataurl: string): string => {
+    if (!dataurl) return "";
     const arr = dataurl.split(",");
-    const match = arr[0].match(/:(.*?);/);
-    if (!match) {
-      console.error("Invalid data URL format");
-      return null;
-    }
-    const mime = match[1];
-    //base64로 인코딩된 문자열 디코딩
-    const decodedStr = atob(arr[1]);
-    // 디코딩된 문자열의 길이를 사용하여 Uint8Array 배열을 생성
-    let n = decodedStr.length;
-    const u8arr = new Uint8Array(n);
-    // 문자열의 각 문자를 Uint8Array 배열에 바이트 값으로 저장
-    while (n--) {
-      u8arr[n] = decodedStr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
+    return arr[1]; // base64 인코딩된 데이터 부분만 리턴
   };
 
   const handleMapMouseUp = (e: MouseEvent<HTMLDivElement>) => {
@@ -396,7 +396,7 @@ const Compression: React.FC = () => {
 
     const dataUrl = croppedCanvas?.toDataURL("image/png");
     setScreenshotUrl(dataUrl);
-    setImageBlob(dataURLtoBlob(dataUrl));
+    setImageStr(dataURLtoBase64(dataUrl));
     setIsSelected(true);
   };
 
@@ -411,10 +411,10 @@ const Compression: React.FC = () => {
       });
     }
   };
+
   useEffect(() => {
-    console.log(imageBlob);
     if (isCompressionModal) {
-      // handleApiCall();///
+      handleApiCall(); ///
     }
   }, [isCompressionModal]);
 
@@ -438,8 +438,11 @@ const Compression: React.FC = () => {
               <CompressionModal
                 url={screenshotUrl}
                 setIsCompressionModal={setIsCompressionModal}
+                setIsSaveClicked={setIsSaveClicked}
               />
             )}
+            {/* Save버튼 클릭 시 */}
+            {isSaveClicked && <SavedModal />}
             <ToolBar
               selectedTool={selectedTool}
               setSelectedTool={setSelectedTool}
