@@ -60,10 +60,6 @@ const MapView: React.FC = () => {
   ];
 
   const markerLayer = useMarker(markerPosition);
-  const [modalPosition, setModalPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -145,12 +141,6 @@ const MapView: React.FC = () => {
                 () => {
                   //animate이후에 setMarkerClicked true로 지정해서 모달이 더 늦게 뜨도록하기
                   if (mapRef.current) {
-                    const { clientWidth, clientHeight } = mapRef.current;
-                    //modal 위치를 화면 정중앙으로
-                    setModalPosition({
-                      x: clientWidth / 2.1,
-                      y: clientHeight / 3,
-                    });
                     setMarkerClicked(true);
                   }
                 }
@@ -195,10 +185,9 @@ const MapView: React.FC = () => {
       <MapContainer ref={mapRef}>
         <ZoomBar handleZoomIn={handleZoomIn} handleZoomOut={handleZoomOut} />
       </MapContainer>
-      {markerClicked && modalPosition && selectedMarker ? (
+      {markerClicked && selectedMarker ? (
         <DetailModal
           setMarkerClicked={setMarkerClicked}
-          modalPosition={modalPosition}
           projectName1={selectedMarker.projectName[0]}
           projectName2={selectedMarker.projectName[1]}
           locationName={selectedMarker.locationName}

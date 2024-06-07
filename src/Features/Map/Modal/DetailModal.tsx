@@ -10,7 +10,6 @@ import styled from "styled-components";
 
 interface ModalProps {
   setMarkerClicked: Dispatch<SetStateAction<boolean>>;
-  modalPosition: { x: number; y: number };
   longitude: number;
   latitude: number;
   projectName1: string;
@@ -26,12 +25,13 @@ interface DataType {
   projectName: string;
   locationName: string;
 }
-const ModalContainer = styled.div<{ position: { x: number; y: number } }>`
+const ModalContainer = styled.div`
   width: 528px;
   height: 350px;
   position: fixed;
-  left: ${({ position }) => position.x}px;
-  top: ${({ position }) => position.y}px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -160,7 +160,6 @@ const DetailBtn = styled.button`
 
 const DetailModal: React.FC<ModalProps> = ({
   setMarkerClicked,
-  modalPosition,
   longitude,
   latitude,
   projectName1,
@@ -190,7 +189,7 @@ const DetailModal: React.FC<ModalProps> = ({
   }, [data, navigate, setMarkerClicked]);
 
   return (
-    <ModalContainer position={modalPosition}>
+    <ModalContainer>
       <ModalHeader>
         <LocTxt>{locationName}</LocTxt>
         <CountryTxt>{country}</CountryTxt>
