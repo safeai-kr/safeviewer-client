@@ -31,8 +31,7 @@ const HeaderTxt = styled.div`
 const Logo = styled(FontAwesomeIcon)`
   color: #58595b;
   float: left;
-  height: 10px;
-  weight: 10px;
+  max-height: 10px;
   margin-right: 4px;
 `;
 const RightLogo = styled(FontAwesomeIcon)`
@@ -42,7 +41,7 @@ const RightLogo = styled(FontAwesomeIcon)`
   weight: 18px;
 `;
 const UploadLogo = styled(FontAwesomeIcon)`
-  color: #58595b;
+  color: white;
   float: left;
   height: 18px;
   weight: 18px;

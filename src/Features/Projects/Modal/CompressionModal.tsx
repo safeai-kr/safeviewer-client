@@ -253,7 +253,7 @@ const CompressionModal: React.FC<ModalProps> = ({
     setIsSaveClicked(true);
     setTimeout(() => {
       setIsSaveClicked(false);
-    }, 2000);
+    }, 1500);
   };
   return (
     <ModalBackground onClick={() => setIsCompressionModal(false)}>

@@ -10,7 +10,7 @@ interface ZoomProps {
 
 const ZoomContainer = styled.div`
   position: absolute;
-  top: 282px;
+  top: 350px;
   background: #272727;
   z-index: 1000;
   display: flex;

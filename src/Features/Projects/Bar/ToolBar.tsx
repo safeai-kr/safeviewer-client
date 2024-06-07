@@ -21,7 +21,6 @@ const ToolContainer = styled.div`
   align-items: center;
   background-color: #272727;
   position: absolute;
-  top: 0;
   z-index: 1000;
   gap: 8px;
 `;
