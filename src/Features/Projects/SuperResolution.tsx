@@ -10,7 +10,7 @@ import {
   ProjectionLike,
   transformExtent,
 } from "ol/proj";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { WMTS } from "ol/source";
 import { defaults as defaultControls } from "ol/control";
 import { getTopLeft, getWidth } from "ol/extent";
@@ -18,6 +18,7 @@ import WMTSTileGrid from "ol/tilegrid/WMTS";
 import ToolBar from "./Bar/ToolBar";
 import ZoomBar from "./Bar/ZoomBar";
 import useCustomApi from "./API/useDetectionApi";
+import MagicBarTip from "./ToolTip/MagicBarTip";
 
 interface Selection {
   x: number;
@@ -32,7 +33,7 @@ interface ApiResponse {
   predictions: string; // json으로 파싱
 }
 
-const ProjectMap = styled.div`
+const ProjectMap = styled.div<{ isMagicTip: boolean }>`
   height: 100vh;
   position: relative;
   canvas {
@@ -40,6 +41,11 @@ const ProjectMap = styled.div`
     top: 0;
     left: 0;
   }
+  ${({ isMagicTip }) =>
+    isMagicTip &&
+    css`
+      filter: blur(5px);
+    `}
 `;
 
 const SuperResolution: React.FC = () => {
@@ -51,21 +57,9 @@ const SuperResolution: React.FC = () => {
   const [longitude, setLongitude] = useState<number>(6.230747225);
   const [latitude, setLatitude] = useState<number>(49.63796111);
   useEffect(() => {
-    setLongitude(
-      parseFloat(sessionStorage.getItem("longitude") || "6.23097225")
-    );
-    setLatitude(
-      parseFloat(sessionStorage.getItem("latitude") || "49.63796111")
-    );
+    sessionStorage.setItem("project", "Super resolution");
   }, []);
 
-  //탭으로 이동 시에 평택에서 넘어오면 위/경도 룩셈부르크 공항으로 지정
-  useEffect(() => {
-    if (sessionStorage.getItem("location") !== "Luxembourg Airport") {
-      setLongitude(6.230747225);
-      setLatitude(49.63796111);
-    }
-  }, [longitude, latitude]);
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
 
@@ -74,17 +68,20 @@ const SuperResolution: React.FC = () => {
   //사진 레이어 추가용 state
   const [wmtsLayer, setWmtsLayer] = useState<TileLayer<WMTS> | null>(null);
 
+  //툴팁 표시 상태
+  const [isMagicTip, setIsMagicTip] = useState<boolean>(true);
+
   useEffect(() => {
     if (!mapRef.current) return;
 
     const initialCoordinates = fromLonLat(
-      [longitude, latitude - 0.002],
+      [longitude, latitude],
       getProjection("EPSG:3857") as ProjectionLike
     );
     const initialView = new View({
       center: initialCoordinates,
-      zoom: 12, // 초기 줌 레벨
-      minZoom: 16, // 최소 줌 레벨
+      zoom: 17.5, // 초기 줌 레벨
+      minZoom: 15, // 최소 줌 레벨
       maxZoom: 21, // 최대 줌 레벨
       projection: "EPSG:3857",
     });
@@ -207,20 +204,10 @@ const SuperResolution: React.FC = () => {
 
   return (
     <>
-      <ProjectMap ref={mapRef}>
-        {view && (
-          <>
-            <ToolBar
-              selectedTool={selectedTool}
-              setSelectedTool={setSelectedTool}
-            />
-            <ZoomBar
-              handleZoomIn={handleZoomIn}
-              handleZoomOut={handleZoomOut}
-            />
-          </>
-        )}
-      </ProjectMap>
+      {isMagicTip && <MagicBarTip setIsMagicTip={setIsMagicTip} />}
+      <ToolBar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+      <ZoomBar handleZoomIn={handleZoomIn} handleZoomOut={handleZoomOut} />
+      <ProjectMap isMagicTip={isMagicTip} ref={mapRef} />
     </>
   );
 };

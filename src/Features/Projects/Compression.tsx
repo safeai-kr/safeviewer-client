@@ -22,6 +22,8 @@ import CompressionModal from "./Modal/CompressionModal";
 import useCompressionApi from "./API/useCompressionApi";
 import SelectionCloseBtn from "./Component/SelectionCloseBtn";
 import SavedModal from "./Modal/SavedModal";
+import DragTip from "./ToolTip/DragTip";
+import ExportTip from "./ToolTip/ExportTip";
 interface Selection {
   x: number;
   y: number;
@@ -40,7 +42,7 @@ interface ApiResponse {
   predictions: string; // json으로 파싱
 }
 
-const ProjectMap = styled.div`
+const ProjectMap = styled.div<{ isToolIng: boolean }>`
   height: 100vh;
   position: relative;
   canvas {
@@ -48,6 +50,11 @@ const ProjectMap = styled.div`
     top: 0;
     left: 0;
   }
+  ${({ isToolIng }) =>
+    isToolIng &&
+    css`
+      filter: blur(5px);
+    `}
 `;
 
 //before 가상 요소는 선택된 영역의 크기와 위치를 지정하고, box-shadow를 사용하여 선택된 영역 외부를 어둡게 만듭니다.
@@ -113,22 +120,10 @@ const Compression: React.FC = () => {
   const [longitude, setLongitude] = useState<number>(6.230747225);
   const [latitude, setLatitude] = useState<number>(49.63796111);
 
+  //마운트 시
   useEffect(() => {
-    setLongitude(
-      parseFloat(sessionStorage.getItem("longitude") || "6.23097225")
-    );
-    setLatitude(
-      parseFloat(sessionStorage.getItem("latitude") || "49.63796111")
-    );
+    sessionStorage.setItem("project", "Compression");
   }, []);
-
-  //탭으로 이동 시에 평택에서 넘어오면 위/경도 룩셈부르크 공항으로 지정
-  useEffect(() => {
-    if (sessionStorage.getItem("location") !== "Luxembourg Airport") {
-      setLongitude(6.230747225);
-      setLatitude(49.63796111);
-    }
-  }, [longitude, latitude]);
 
   const downloadLinkRef = useRef<HTMLAnchorElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -138,7 +133,7 @@ const Compression: React.FC = () => {
 
   //선택된 영역
   const [selection, setSelection] = useState<Selection | null>(null);
-  //선택이 완료되었는 지에 대한 상태
+  //선택이 완료되었는 지에 대한 상태(블러 효과와 selection close 버튼을 위해)
   const [isSelected, setIsSelected] = useState<boolean>(false);
   //마우스 클릭 지점(스크린샷 시작 지점)
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(
@@ -155,17 +150,23 @@ const Compression: React.FC = () => {
   //사진 레이어 추가용 state
   const [wmtsLayer, setWmtsLayer] = useState<TileLayer<WMTS> | null>(null);
 
+  //툴팁 표시 상태
+  const [isDragTip, setIsDragTip] = useState<boolean>(true);
+  const [isExportTip, setIsExportTip] = useState<boolean>(false);
+
+  //툴팁 진행 상태
+  const [isToolIng, setIsToolIng] = useState<boolean>(true);
   useEffect(() => {
     if (!mapRef.current) return;
 
     const initialCoordinates = fromLonLat(
-      [longitude, latitude - 0.002],
+      [longitude, latitude - 0.0002],
       getProjection("EPSG:3857") as ProjectionLike
     );
     const initialView = new View({
       center: initialCoordinates,
-      zoom: 12, // 초기 줌 레벨
-      minZoom: 16, // 최소 줌 레벨
+      zoom: 17, // 초기 줌 레벨
+      minZoom: 15, // 최소 줌 레벨
       maxZoom: 21, // 최대 줌 레벨
       projection: "EPSG:3857",
     });
@@ -418,18 +419,25 @@ const Compression: React.FC = () => {
     }
   }, [isCompressionModal]);
 
-  //api 호출 정상적으로 작동하는지 테스트용 코드
-  useEffect(() => {
-    // handleApiCall();
-  }, []);
-
   return (
     <>
+      {isDragTip && (
+        <DragTip setIsDragTip={setIsDragTip} setIsExportTip={setIsExportTip} />
+      )}
+      {isExportTip && (
+        <ExportTip
+          setIsExportTip={setIsExportTip}
+          setIsToolIng={setIsToolIng}
+        />
+      )}
+      <ToolBar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+      <ZoomBar handleZoomIn={handleZoomIn} handleZoomOut={handleZoomOut} />
       <ProjectMap
         ref={mapRef}
         onMouseDown={handleMapMouseDown}
         onMouseMove={handleMapMouseMove}
         onMouseUp={handleMapMouseUp}
+        isToolIng={isToolIng}
       >
         <BlurScreen selection={isSelected ? selection : null} />
         {view && (
@@ -443,14 +451,7 @@ const Compression: React.FC = () => {
             )}
             {/* Save버튼 클릭 시 */}
             {isSaveClicked && <SavedModal />}
-            <ToolBar
-              selectedTool={selectedTool}
-              setSelectedTool={setSelectedTool}
-            />
-            <ZoomBar
-              handleZoomIn={handleZoomIn}
-              handleZoomOut={handleZoomOut}
-            />
+
             {selection !== null && (
               <>
                 <SelectedBox

@@ -21,6 +21,8 @@ import ZoomBar from "./Bar/ZoomBar";
 import useDetectionApi from "./API/useDetectionApi";
 import CustomRightSideBar from "./Bar/SideBar/CustomRightSideBar";
 import SelectionCloseBtn from "./Component/SelectionCloseBtn";
+import DragTip from "./ToolTip/DragTip";
+import CustomSideTip from "./ToolTip/CustomSideTip";
 
 interface Selection {
   x: number;
@@ -40,7 +42,7 @@ interface ApiResponse {
   predictions: string; // json으로 파싱
 }
 
-const ProjectMap = styled.div`
+const ProjectMap = styled.div<{ isToolIng: boolean }>`
   width: calc(100% - 296px);
   height: 100vh;
   position: relative;
@@ -49,6 +51,11 @@ const ProjectMap = styled.div`
     top: 0;
     left: 0;
   }
+  ${({ isToolIng }) =>
+    isToolIng &&
+    css`
+      filter: blur(5px);
+    `}
 `;
 
 //before 가상 요소는 선택된 영역의 크기와 위치를 지정하고, box-shadow를 사용하여 선택된 영역 외부를 어둡게 만듭니다.
@@ -112,21 +119,8 @@ const CustomDetection: React.FC = () => {
   const [longitude, setLongitude] = useState<number>(126.837598615);
   const [latitude, setLatitude] = useState<number>(36.96242917);
   useEffect(() => {
-    setLongitude(
-      parseFloat(sessionStorage.getItem("longitude") || "126.837598615")
-    );
-    setLatitude(
-      parseFloat(sessionStorage.getItem("latitude") || "36.96242917")
-    );
+    sessionStorage.setItem("project", "Custom detection");
   }, []);
-
-  //탭으로 이동 시에 평택에서 넘어오면 위/경도 룩셈부르크 공항으로 지정
-  useEffect(() => {
-    if (sessionStorage.getItem("location") !== "Luxembourg Airport") {
-      setLongitude(126.837598615);
-      setLatitude(36.96242917);
-    }
-  }, [longitude, latitude]);
 
   const downloadLinkRef = useRef<HTMLAnchorElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -151,11 +145,17 @@ const CustomDetection: React.FC = () => {
   //사진 레이어 추가용 state
   const [wmtsLayer, setWmtsLayer] = useState<TileLayer<WMTS> | null>(null);
 
+  //툴팁 표시 상태
+  const [isDragTip, setIsDragTip] = useState<boolean>(true);
+  const [isSideTip, setIsSideTip] = useState<boolean>(false);
+
+  //툴팁 진행 상태
+  const [isToolIng, setIsToolIng] = useState<boolean>(true);
   useEffect(() => {
     if (!mapRef.current) return;
 
     const initialCoordinates = fromLonLat(
-      [longitude, latitude - 0.01],
+      [longitude, latitude],
       getProjection("EPSG:3857") as ProjectionLike
     );
     const initialView = new View({
@@ -434,23 +434,27 @@ const CustomDetection: React.FC = () => {
 
   return (
     <>
+      {isDragTip && (
+        <DragTip setIsDragTip={setIsDragTip} setIsSideTip={setIsSideTip} />
+      )}
+      {isSideTip && (
+        <CustomSideTip
+          setIsSideTip={setIsSideTip}
+          setIsToolIng={setIsToolIng}
+        />
+      )}
+      <ToolBar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+      <ZoomBar handleZoomIn={handleZoomIn} handleZoomOut={handleZoomOut} />
       <ProjectMap
         ref={mapRef}
         onMouseDown={handleMapMouseDown}
         onMouseMove={handleMapMouseMove}
         onMouseUp={handleMapMouseUp}
+        isToolIng={isToolIng}
       >
         <BlurScreen selection={isSelected ? selection : null} />
         {view && (
           <>
-            <ToolBar
-              selectedTool={selectedTool}
-              setSelectedTool={setSelectedTool}
-            />
-            <ZoomBar
-              handleZoomIn={handleZoomIn}
-              handleZoomOut={handleZoomOut}
-            />
             {selection !== null && (
               <>
                 <SelectedBox
