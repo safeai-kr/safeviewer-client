@@ -2,21 +2,17 @@ import { useMutation } from "react-query";
 import axios from "axios";
 
 interface ApiData {
-  image_base64: string | null;
+  image_url: string | null;
 }
 const useCompressionApi = () => {
   return useMutation((data: ApiData) => {
-    return axios.post(
-      "https://bento-img-classifier-cloud-run-service-rw7cysgb5a-od.a.run.app/predict/compression",
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          // "Access-Control-Allow-Origin": "*",
-        },
-        // withCredentials: true,
-      }
-    );
+    return axios.post("http://121.254.217.70:3000/predict/compression", data, {
+      headers: {
+        "Content-Type": "application/json",
+        // "Access-Control-Allow-Origin": "*",
+      },
+      // withCredentials: true,
+    });
   });
 };
 

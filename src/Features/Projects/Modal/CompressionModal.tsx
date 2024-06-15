@@ -7,6 +7,7 @@ interface ModalProps {
   url: string;
   setIsCompressionModal: React.Dispatch<React.SetStateAction<boolean>>;
   setIsSaveClicked: React.Dispatch<React.SetStateAction<boolean>>;
+  outputImageUrl: string;
 }
 
 const ModalBackground = styled.div`
@@ -201,36 +202,35 @@ const CompressionModal: React.FC<ModalProps> = ({
   url,
   setIsCompressionModal,
   setIsSaveClicked,
+  outputImageUrl,
 }) => {
-  const [croppedUrl, setCroppedUrl] = useState<string>("");
+  const [croppedBefore, setCroppedBefore] = useState<string>("");
+  const [croppedAfter, setCroppedAfter] = useState<string>("");
 
-  //이미지의 가운데 부분을 임의로 잘라서 정사각형 형태로 캔버스를 그리고 그 잘린 정사각형 이미지를 모달에 띄움
-  useEffect(() => {
+  //Compression 전 이미지의 가운데 부분을 임의로 잘라서 정사각형 형태로 캔버스를 그리고 그 잘린 정사각형 이미지를 모달에 띄움
+  // 이미지를 크롭하는 함수
+  const cropImage = (
+    imageUrl: string,
+    setCroppedImage: React.Dispatch<React.SetStateAction<string>>
+  ) => {
     const image = new Image();
-    image.src = url;
-    //image가 성공적으로 로딩 되었을 때
+
+    image.src = imageUrl;
+    image.crossOrigin = "anonymous"; // crossOrigin 설정
     image.onload = () => {
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
 
       if (!context) return;
 
-      // 이미지의 중심점
       const centerX = image.width / 2;
       const centerY = image.height / 2;
-
-      // 너비와 높이 중 더 작은 값을 기준으로 크롭할 크기 계산
       const cropSize = Math.min(image.width, image.height);
-
-      // 크롭할 사각형의 시작점 계산
       const startX = centerX - cropSize / 2;
       const startY = centerY - cropSize / 2;
 
-      // 캔버스 크기 설정
       canvas.width = 400;
       canvas.height = 400;
-
-      // 이미지의 크롭된 영역을 캔버스에 그리기
       context.drawImage(
         image,
         startX,
@@ -243,12 +243,27 @@ const CompressionModal: React.FC<ModalProps> = ({
         400
       );
 
-      // 새로운 이미지 URL 생성
-      setCroppedUrl(canvas.toDataURL("image/png"));
+      setCroppedImage(canvas.toDataURL("image/png"));
     };
+
+    image.onerror = (error) => {
+      console.error("Image failed to load", error);
+    };
+  };
+
+  useEffect(() => {
+    if (url) cropImage(url, setCroppedBefore);
   }, [url]);
 
+  useEffect(() => {
+    if (outputImageUrl) cropImage(outputImageUrl, setCroppedAfter);
+  }, [outputImageUrl]);
+
   const handleSaveClick = () => {
+    const link = document.createElement("a");
+    link.href = croppedAfter;
+    link.download = "compressed_image.png";
+    link.click();
     setIsCompressionModal(false);
     setIsSaveClicked(true);
     setTimeout(() => {
@@ -264,9 +279,9 @@ const CompressionModal: React.FC<ModalProps> = ({
         </ModalHeader>
         <ModalContents>
           <ImgContainer>
-            <ImgCompress src={croppedUrl} alt="Screenshot" />
+            <ImgCompress src={croppedBefore} alt="Screenshot" />
             <ArrowIcon icon={faArrowRight} />
-            <ImgCompress src={croppedUrl} alt="Screenshot" />
+            <ImgCompress src={croppedAfter} alt="Screenshot" />
           </ImgContainer>
           <RightContents>
             <RightBox>

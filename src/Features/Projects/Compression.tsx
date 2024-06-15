@@ -24,6 +24,7 @@ import SelectionCloseBtn from "./Component/SelectionCloseBtn";
 import SavedModal from "./Modal/SavedModal";
 import DragTip from "./ToolTip/DragTip";
 import ExportTip from "./ToolTip/ExportTip";
+import axios from "axios";
 interface Selection {
   x: number;
   y: number;
@@ -141,8 +142,8 @@ const Compression: React.FC = () => {
   );
   //스크린샷 url
   const [screenshotUrl, setScreenshotUrl] = useState<string>("");
-  //이미지 base64인코딩 string
-  const [imageStr, setImageStr] = useState<string | "">("");
+  //Compression 진행 후 이미지 url
+  const [outputImageUrl, setOutputImageUrl] = useState<string>("");
 
   //모달 내 save button 클릭 state
   const [isSaveClicked, setIsSaveClicked] = useState<boolean>(false);
@@ -243,19 +244,46 @@ const Compression: React.FC = () => {
     };
   }, []);
 
-  //Detection API 호출
-  const handleApiCall = () => {
-    if (!imageStr) return;
+  //Compression API 호출
+  const handleApiCall = async () => {
+    if (!screenshotUrl) return;
+    // GCS 버킷에 파일 업로드
+    const model_name = "MLIC"; // 모델이름
+    const timestamp_date = new Date()
+      .toISOString()
+      .split("T")[0]
+      .replace(/-/g, "");
+    //파일 경로
+    const fileName = `bentoml/${model_name}/${timestamp_date}/input/compression_img_${new Date().getTime()}.png`;
+    const blob = await fetch(screenshotUrl).then((res) => res.blob());
+
+    //버킷에 파일 올리는 url 요청
+    const response = await axios.post(
+      `https://storage.googleapis.com/upload/storage/v1/b/ml-input-image/o?uploadType=media&name=${fileName}`,
+      blob,
+      {
+        headers: {
+          "Content-Type": "image/png",
+        },
+      }
+    );
+    // console.log(response);
+
+    //파일이 업로드 된 버킷의 URL
+    const gcsURL = `https://storage.googleapis.com/ml-input-image/${fileName}`;
+
     const requestData = {
-      image_base64: imageStr,
+      image_url: gcsURL,
     };
 
+    //버킷 URL을 통해 서버에 Compression 요청
     mutation.mutate(requestData, {
-      onSuccess: (response) => {
+      onSuccess: async (response) => {
         console.log("API call success:", response);
-        // const apiResponse = response.data.predictions[0] as ApiResponse;
-        // const parsedPredictions = JSON.parse(apiResponse.predictions); //JSON.parse(): JSON 문자열을 JavaScript 객체로 변환
-        // setPredictions(parsedPredictions);
+        const outputUrl = response.data.output_url;
+        //output url을 통해 이미지 가져오기
+        if (!outputUrl) return;
+        setOutputImageUrl(outputUrl);
       },
       onError: (error) => {
         console.error("API call error:", error);
@@ -351,13 +379,6 @@ const Compression: React.FC = () => {
     setSelection(newSelection);
   };
 
-  // 데이터 URL에서 base64 인코딩된 부분을 추출
-  const dataURLtoBase64 = (dataurl: string): string => {
-    if (!dataurl) return "";
-    const arr = dataurl.split(",");
-    return arr[1]; // base64 인코딩된 데이터 부분만 리턴
-  };
-
   const handleMapMouseUp = (e: MouseEvent<HTMLDivElement>) => {
     if (selectedTool !== "drag") return;
     setStartPoint(null);
@@ -397,7 +418,6 @@ const Compression: React.FC = () => {
 
     const dataUrl = croppedCanvas?.toDataURL("image/png");
     setScreenshotUrl(dataUrl);
-    setImageStr(dataURLtoBase64(dataUrl));
     setIsSelected(true);
   };
 
@@ -415,7 +435,7 @@ const Compression: React.FC = () => {
 
   useEffect(() => {
     if (isCompressionModal) {
-      handleApiCall(); ///
+      handleApiCall();
     }
   }, [isCompressionModal]);
 
@@ -447,6 +467,7 @@ const Compression: React.FC = () => {
                 url={screenshotUrl}
                 setIsCompressionModal={setIsCompressionModal}
                 setIsSaveClicked={setIsSaveClicked}
+                outputImageUrl={outputImageUrl}
               />
             )}
             {/* Save버튼 클릭 시 */}
