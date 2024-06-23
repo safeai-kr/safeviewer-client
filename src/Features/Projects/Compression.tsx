@@ -25,6 +25,8 @@ import SavedModal from "./Modal/SavedModal";
 import DragTip from "./ToolTip/DragTip";
 import ExportTip from "./ToolTip/ExportTip";
 import axios from "axios";
+import { Oval } from "react-loader-spinner";
+import LoadingModal from "./Modal/LoadingModal";
 interface Selection {
   x: number;
   y: number;
@@ -41,6 +43,12 @@ interface ApiResponse {
   image_url: string;
   candidate_labels: string;
   predictions: string; // json으로 파싱
+}
+
+interface FileSize {
+  input_file_size: string;
+  output_file_size: string;
+  percentage: string;
 }
 
 const ProjectMap = styled.div<{ isToolIng: boolean }>`
@@ -116,6 +124,9 @@ const Compression: React.FC = () => {
   const [isCompressionModal, setIsCompressionModal] = useRecoilState<boolean>(
     IsCompressionModalState
   );
+  const [fileSize, setFileSize] = useState<FileSize>();
+  //Api 호출 로딩
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   // 기본값 설정
   const [longitude, setLongitude] = useState<number>(6.230747225);
@@ -147,6 +158,8 @@ const Compression: React.FC = () => {
 
   //모달 내 save button 클릭 state
   const [isSaveClicked, setIsSaveClicked] = useState<boolean>(false);
+  //Compression 요청에 대한 응답 state
+  // const [isResponse, setIsReponse] = useState<boolean>(false);
 
   //사진 레이어 추가용 state
   const [wmtsLayer, setWmtsLayer] = useState<TileLayer<WMTS> | null>(null);
@@ -267,7 +280,7 @@ const Compression: React.FC = () => {
         },
       }
     );
-    // console.log(response);
+    console.log(response);
 
     //파일이 업로드 된 버킷의 URL
     const gcsURL = `https://storage.googleapis.com/ml-input-image/${fileName}`;
@@ -280,10 +293,34 @@ const Compression: React.FC = () => {
     mutation.mutate(requestData, {
       onSuccess: async (response) => {
         console.log("API call success:", response);
-        const outputUrl = response.data.output_url;
-        //output url을 통해 이미지 가져오기
-        if (!outputUrl) return;
-        setOutputImageUrl(outputUrl);
+
+        const task_id = response.data.task_id;
+        if (!outputImageUrl && task_id) {
+          const fetchStatus = async () => {
+            try {
+              const statusResponse = await axios.post(
+                "https://mlapi.safeai.kr/compression/predict/status",
+                {
+                  task_id: task_id,
+                }
+              );
+              console.log(statusResponse);
+              setFileSize(statusResponse.data.file_size);
+              const outputUrlFromStatus = statusResponse.data.output_url;
+
+              // Output URL을 통해 이미지 가져오기
+              if (outputUrlFromStatus) {
+                setOutputImageUrl(outputUrlFromStatus);
+                clearInterval(statusInterval); // 요청 멈추기
+                setIsLoading(false);
+              }
+            } catch (error) {
+              console.error("Error: ", error);
+            }
+          };
+          // 1.5초마다 fetchStatus 함수 호출
+          const statusInterval = setInterval(fetchStatus, 1500);
+        }
       },
       onError: (error) => {
         console.error("API call error:", error);
@@ -435,8 +472,9 @@ const Compression: React.FC = () => {
 
   useEffect(() => {
     if (isCompressionModal) {
+      setIsLoading(true);
       handleApiCall();
-    }
+    } else setOutputImageUrl("");
   }, [isCompressionModal]);
 
   return (
@@ -462,12 +500,15 @@ const Compression: React.FC = () => {
         <BlurScreen selection={isSelected ? selection : null} />
         {view && (
           <>
-            {isCompressionModal && screenshotUrl && (
+            {isLoading && <LoadingModal />}
+            {isCompressionModal && screenshotUrl && outputImageUrl !== "" && (
               <CompressionModal
                 url={screenshotUrl}
                 setIsCompressionModal={setIsCompressionModal}
                 setIsSaveClicked={setIsSaveClicked}
                 outputImageUrl={outputImageUrl}
+                file_size={fileSize}
+                // setIsReponse={setIsReponse}
               />
             )}
             {/* Save버튼 클릭 시 */}

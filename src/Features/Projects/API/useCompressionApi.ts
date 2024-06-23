@@ -6,7 +6,7 @@ interface ApiData {
 }
 const useCompressionApi = () => {
   return useMutation((data: ApiData) => {
-    return axios.post("http://121.254.217.70:3000/predict/compression", data, {
+    return axios.post("https://mlapi.safeai.kr/compression/predict", data, {
       headers: {
         "Content-Type": "application/json",
         // "Access-Control-Allow-Origin": "*",

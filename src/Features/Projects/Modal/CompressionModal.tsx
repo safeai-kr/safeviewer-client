@@ -3,11 +3,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
+interface FileSize {
+  input_file_size: string;
+  output_file_size: string;
+  percentage: string;
+}
 interface ModalProps {
   url: string;
   setIsCompressionModal: React.Dispatch<React.SetStateAction<boolean>>;
   setIsSaveClicked: React.Dispatch<React.SetStateAction<boolean>>;
   outputImageUrl: string;
+  file_size: FileSize | undefined;
+  // setIsReponse: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ModalBackground = styled.div`
@@ -146,14 +153,15 @@ const VolumeTxt = styled.div`
 
 const LeftBar = styled.div`
   width: 52px;
-  height: 64px;
+  height: 56px;
   border-radius: 4px 4px 0px 0px;
   background-color: #7d7d7d;
 `;
 
-const RightBar = styled.div`
+const RightBar = styled.div<{ percentage: number }>`
   width: 52px;
-  height: 8px;
+  min-height: 8px;
+  height: ${({ percentage }) => 56 * (100 - percentage) * 0.01}px;
   border-radius: 4px 4px 0px 0px;
   background-color: #13ed0e;
 `;
@@ -203,9 +211,21 @@ const CompressionModal: React.FC<ModalProps> = ({
   setIsCompressionModal,
   setIsSaveClicked,
   outputImageUrl,
+  file_size,
+  // setIsReponse,
 }) => {
+  console.log(file_size);
   const [croppedBefore, setCroppedBefore] = useState<string>("");
   const [croppedAfter, setCroppedAfter] = useState<string>("");
+  // 퍼센티지를 소수점 없이 표시
+  const percentage = Math.floor(Number(file_size?.percentage.replace("%", "")));
+  // 파일 크기를 소수점 첫째자리까지 표시
+  const inputFileSize = (
+    Number(file_size?.input_file_size.replace(" KB", "")) / 1024
+  ).toFixed(1);
+  const outputFileSize = (
+    Number(file_size?.output_file_size.replace(" KB", "")) / 1024
+  ).toFixed(1);
 
   //Compression 전 이미지의 가운데 부분을 임의로 잘라서 정사각형 형태로 캔버스를 그리고 그 잘린 정사각형 이미지를 모달에 띄움
   // 이미지를 크롭하는 함수
@@ -259,16 +279,30 @@ const CompressionModal: React.FC<ModalProps> = ({
     if (outputImageUrl) cropImage(outputImageUrl, setCroppedAfter);
   }, [outputImageUrl]);
 
+  // useEffect(() => {
+  //   setIsReponse(false);
+  // }, []);
+
   const handleSaveClick = () => {
-    const link = document.createElement("a");
-    link.href = croppedAfter;
-    link.download = "compressed_image.png";
-    link.click();
-    setIsCompressionModal(false);
-    setIsSaveClicked(true);
-    setTimeout(() => {
-      setIsSaveClicked(false);
-    }, 1500);
+    //이미지를 blob객체로 만들고 url 생성
+    fetch(outputImageUrl)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = "compressed_image.png";
+        link.click();
+        URL.revokeObjectURL(url);
+        setIsCompressionModal(false);
+        setIsSaveClicked(true);
+        setTimeout(() => {
+          setIsSaveClicked(false);
+        }, 1500);
+      })
+      .catch((error) => {
+        console.error("Error downloading the image", error);
+      });
   };
   return (
     <ModalBackground onClick={() => setIsCompressionModal(false)}>
@@ -285,15 +319,15 @@ const CompressionModal: React.FC<ModalProps> = ({
           </ImgContainer>
           <RightContents>
             <RightBox>
-              <Ratio>82%</Ratio>
+              <Ratio>{percentage}%</Ratio>
               <InteractionBox>
                 <LeftBar />
                 <ArrowIcon icon={faArrowRight} />
-                <RightBar />
+                <RightBar percentage={percentage} />
               </InteractionBox>
               <VolumeBox>
-                <VolumeTxt>18.7MB</VolumeTxt>
-                <VolumeTxt>3.5MB</VolumeTxt>
+                <VolumeTxt>{inputFileSize}MB</VolumeTxt>
+                <VolumeTxt>{outputFileSize}MB</VolumeTxt>
               </VolumeBox>
             </RightBox>
             <TxtBox>
