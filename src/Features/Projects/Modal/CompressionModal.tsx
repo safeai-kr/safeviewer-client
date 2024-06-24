@@ -161,7 +161,7 @@ const LeftBar = styled.div`
 const RightBar = styled.div<{ percentage: number }>`
   width: 52px;
   min-height: 8px;
-  height: ${({ percentage }) => 56 * (100 - percentage) * 0.01}px;
+  height: ${({ percentage }) => 56 * percentage * 0.01}px;
   border-radius: 4px 4px 0px 0px;
   background-color: #13ed0e;
 `;
