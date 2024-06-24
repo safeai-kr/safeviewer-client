@@ -4,16 +4,14 @@ import axios from "axios";
 interface ApiData {
   image_url: string | null;
 }
-const useSuperResolutionApi = () => {
+const useDetectionApi = () => {
   return useMutation((data: ApiData) => {
-    return axios.post("https://mlapi.safeai.kr/resolution/predict", data, {
+    return axios.post("https://mlapi.safeai.kr/detection/predict", data, {
       headers: {
         "Content-Type": "application/json",
-        // "Access-Control-Allow-Origin": "*",
       },
-      // withCredentials: true,
     });
   });
 };
 
-export default useSuperResolutionApi;
+export default useDetectionApi;
