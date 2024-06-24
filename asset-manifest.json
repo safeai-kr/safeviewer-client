@@ -1,13 +1,45 @@
 {
   "files": {
-    "main.css": "/static/css/main.80e95bee.css",
-    "main.js": "/static/js/main.bcb48f15.js",
+    "main.css": "/static/css/main.d13857aa.css",
+    "main.js": "/static/js/main.67a1243b.js",
+    "static/media/after1.png": "/static/media/after1.69993cdaa3e488849a06.png",
+    "static/media/after2.png": "/static/media/after2.d812172df93dd0fa6846.png",
+    "static/media/super-resolution1.png": "/static/media/super-resolution1.d48c29f64b9fa3e42730.png",
+    "static/media/Ship_0016.png": "/static/media/Ship_0016.4bcddafb474abea4fe4c.png",
+    "static/media/Ship_0001.png": "/static/media/Ship_0001.6529265ebbef3c484579.png",
+    "static/media/Ship_0014.png": "/static/media/Ship_0014.dcdb3156cd34fa6ebe96.png",
+    "static/media/Ship_0018.png": "/static/media/Ship_0018.b30970735eb7f44a829a.png",
+    "static/media/Ship_0015.png": "/static/media/Ship_0015.9bad1216fee098da1492.png",
+    "static/media/Ship_0002.png": "/static/media/Ship_0002.7e94a314275dae5b2188.png",
+    "static/media/Ship_0019.png": "/static/media/Ship_0019.1323a000ee9c04b5c6fe.png",
+    "static/media/Ship_0005.png": "/static/media/Ship_0005.0d3d275e6efe06d26569.png",
+    "static/media/Ship_0020.png": "/static/media/Ship_0020.6c7420e7cde3f8a5e5e9.png",
+    "static/media/Ship_0004.png": "/static/media/Ship_0004.088da4e0acdd702fa464.png",
+    "static/media/Ship_0021.png": "/static/media/Ship_0021.4f03dd5bcbfb5999662c.png",
+    "static/media/Ship_0017.png": "/static/media/Ship_0017.e3e13b02c7dd9e89727c.png",
+    "static/media/Ship_0013.png": "/static/media/Ship_0013.3a1ad9e5272918d46554.png",
+    "static/media/Ship_0006.png": "/static/media/Ship_0006.cbf6441e29163f5dfef5.png",
+    "static/media/Ship_0011.png": "/static/media/Ship_0011.d7c0a6c1642e149a76fa.png",
+    "static/media/Ship_0012.png": "/static/media/Ship_0012.3c382437b6b8001940c1.png",
+    "static/media/Ship_0010.png": "/static/media/Ship_0010.1c968f508c07f54b25e3.png",
+    "static/media/Ship_0008.png": "/static/media/Ship_0008.882ca2afb2865185d279.png",
+    "static/media/Ship_0007.png": "/static/media/Ship_0007.b4c29700020563ebf531.png",
+    "static/media/Ship_0024.png": "/static/media/Ship_0024.16e1b015ef82e7e4c0fd.png",
+    "static/media/Ship_0023.png": "/static/media/Ship_0023.065efa6ee0429da44a08.png",
+    "static/media/Ship_0009.png": "/static/media/Ship_0009.5ed3e300187fe5eaa35f.png",
+    "static/media/super-resolution2.jpg": "/static/media/super-resolution2.2092ea76b7282e6bec00.jpg",
+    "static/media/Ship_0025.png": "/static/media/Ship_0025.c7dee5d10a05eadf64d3.png",
+    "static/media/Ship_0028.png": "/static/media/Ship_0028.cc048d148a92b722381c.png",
+    "static/media/Ship_0003.png": "/static/media/Ship_0003.763636a0ca82aa937f2d.png",
+    "static/media/Ship_0026.png": "/static/media/Ship_0026.e62e587f2a2d087774c5.png",
+    "static/media/Ship_0022.png": "/static/media/Ship_0022.1b57eb0d8a98544fe67f.png",
+    "static/media/Ship_0027.png": "/static/media/Ship_0027.ea1f41e5fdacfe751aa1.png",
     "index.html": "/index.html",
-    "main.80e95bee.css.map": "/static/css/main.80e95bee.css.map",
-    "main.bcb48f15.js.map": "/static/js/main.bcb48f15.js.map"
+    "main.d13857aa.css.map": "/static/css/main.d13857aa.css.map",
+    "main.67a1243b.js.map": "/static/js/main.67a1243b.js.map"
   },
   "entrypoints": [
-    "static/css/main.80e95bee.css",
-    "static/js/main.bcb48f15.js"
+    "static/css/main.d13857aa.css",
+    "static/js/main.67a1243b.js"
   ]
 }
