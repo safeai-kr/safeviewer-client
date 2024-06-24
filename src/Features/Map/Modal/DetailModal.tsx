@@ -7,6 +7,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useNavigate, useNavigation } from "react-router-dom";
 import styled from "styled-components";
+import { colors } from "../../../Utils/colors";
+
+import { ReactComponent as GlobeIcon } from "../../../Icons/main/1_coordinate.svg";
+import { ReactComponent as SatelliteIcon } from "../../../Icons/main/2_satellite.svg";
+import { ReactComponent as CalenderIcon } from "../../../Icons/main/3_calendar.svg";
+import preview1 from "../../../Icons/main/project1_preview.png";
+import preview2 from "../../../Icons/main/project2_preview.png";
+import preview3 from "../../../Icons/main/project3_preview.png";
+import preview4 from "../../../Icons/main/project4_preview.png";
 
 interface ModalProps {
   setMarkerClicked: Dispatch<SetStateAction<boolean>>;
@@ -36,7 +45,7 @@ const ModalContainer = styled.div`
   align-items: center;
   flex-direction: column;
   border-radius: 12px;
-  background: #272727;
+  background: ${colors.default900};
   padding: 28px;
   gap: 32px;
 `;
@@ -139,7 +148,6 @@ const DetailTxt = styled.div`
   font-weight: 600;
   margin-bottom: 8px;
 `;
-const DetailIcon = styled(FontAwesomeIcon)``;
 
 const DetailBtn = styled.button`
   width: 100%;
@@ -149,7 +157,7 @@ const DetailBtn = styled.button`
   border-radius: 999px;
   border: 0.4px solid #fff;
   margin-top: 16px;
-  background: #272727;
+  background: ${colors.default900};
   cursor: pointer;
 
   &:hover {
@@ -208,20 +216,23 @@ const DetailModal: React.FC<ModalProps> = ({
             <IndexBox>{idNum[0]}</IndexBox>
             <ProjectName>{projectName1}</ProjectName>
           </IntroBox>
-
-          <Img src={require("./free-icon-ship-254157.png")} alt="ship" />
+          {locationName === "Luxembourg Airport" ? (
+            <Img src={preview3} />
+          ) : (
+            <Img src={preview1} />
+          )}
 
           <Details>
             <DetailTxt>
-              <DetailIcon icon={faGlobe} />
+              <GlobeIcon style={{ marginRight: "4px" }} />
               {longitude}, {latitude}
             </DetailTxt>
             <DetailTxt>
-              <DetailIcon icon={faSatellite} />
+              <SatelliteIcon style={{ marginRight: "4px" }} />
               Satellite 23.6.18
             </DetailTxt>
             <DetailTxt>
-              <DetailIcon icon={faCalendar} />
+              <CalenderIcon style={{ marginRight: "4px" }} />
               24.5.26
             </DetailTxt>
           </Details>
@@ -235,19 +246,23 @@ const DetailModal: React.FC<ModalProps> = ({
             <ProjectName>{projectName2}</ProjectName>
           </IntroBox>
 
-          <Img src={require("./free-icon-ship-254157.png")} alt="ship" />
+          {locationName === "Luxembourg Airport" ? (
+            <Img src={preview4} />
+          ) : (
+            <Img src={preview2} />
+          )}
 
           <Details>
             <DetailTxt>
-              <DetailIcon icon={faGlobe} />
+              <GlobeIcon style={{ marginRight: "4px" }} />
               {longitude}, {latitude}
             </DetailTxt>
             <DetailTxt>
-              <DetailIcon icon={faSatellite} />
+              <SatelliteIcon style={{ marginRight: "4px" }} />
               Satellite 23.6.18
             </DetailTxt>
             <DetailTxt>
-              <DetailIcon icon={faCalendar} />
+              <CalenderIcon style={{ marginRight: "4px" }} />
               24.5.26
             </DetailTxt>
           </Details>

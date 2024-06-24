@@ -9,6 +9,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { SetStateAction, useState } from "react";
 import styled, { css } from "styled-components";
 import { ShipList } from "../../Data/ShipList";
+import { colors } from "../../../../Utils/colors";
+import { ReactComponent as GlobeIcon } from "../../../../Icons/project1_coordinate.svg";
+
+import { ReactComponent as LengthIcon } from "../../../../Icons/project1_length.svg";
+
+import { ReactComponent as ListIcon } from "../../../../Icons/project1_list.svg";
 
 interface SelectedShip {
   label: string;
@@ -62,7 +68,7 @@ const TxtBox = styled.div`
   padding: 12px;
 `;
 const AllTxt = styled.text`
-  color: #d5d5d5;
+  color: ${colors.default50};
   font-family: Pretendard;
   font-size: 14px;
   font-style: normal;
@@ -118,7 +124,7 @@ const InfoBox = styled.div`
   gap: 8px;
 `;
 const ShipName = styled.div`
-  color: #d5d5d5;
+  color: ${colors.default50};
 
   font-family: Pretendard;
   font-size: 13px;
@@ -126,7 +132,7 @@ const ShipName = styled.div`
   font-weight: 600;
 `;
 const ShipSize = styled.div`
-  color: #d5d5d5;
+  color: ${colors.default50};
 
   font-family: Pretendard;
   font-size: 13px;
@@ -276,17 +282,17 @@ const ShipRightSideBar: React.FC<BarProps> = ({
               />
               <Details>
                 <Detail>
-                  <Logo icon={faGlobe} />
+                  <GlobeIcon width={12} height={12} />
                   <DetailTxt>
                     {formatCoordinates(selectedShip.center)}
                   </DetailTxt>
                 </Detail>
                 <Detail>
-                  <Logo icon={faRulerHorizontal} />
+                  <LengthIcon width={12} height={12} />
                   <DetailTxt>18.5 x 117.2m</DetailTxt>
                 </Detail>
                 <Detail>
-                  <Logo icon={faList} />
+                  <ListIcon width={12} height={12} />
                   <DetailTxt>Container Ship</DetailTxt>
                 </Detail>
               </Details>

@@ -5,6 +5,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Point from "ol/geom/Point";
 import { fromLonLat } from "ol/proj";
+import Marker from "../../../Icons/marker.svg";
 
 interface MarkerProps {
   longitude: number;
@@ -33,7 +34,7 @@ const useMarker = (markerPosition: MarkerProps[]) => {
     image: new Icon({
       opacity: 1, // 투명도 1=100%
       scale: 1.4, // 크기 1=100%
-      src: "http://map.vworld.kr/images/ol3/marker_blue.png",
+      src: Marker,
     }),
   });
 

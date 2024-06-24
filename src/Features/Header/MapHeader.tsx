@@ -7,12 +7,15 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { CurrentProject } from "../Map/Data/CurrentProject";
 import { IsCompressionModalState } from "../Map/Data/IsCompressionModalState";
-
+import { colors } from "../../Utils/colors";
+import { ReactComponent as Shield } from "../../Icons/project3_shild_superresolution.svg";
+import { ReactComponent as Export } from "../../Icons/project4_export.svg";
 const HeaderContainer = styled.div`
   width: 100%;
   height: 28px;
-  background-color: #272727;
+  background-color: ${colors.default900};
   display: flex;
+  flex-direction: row;
   padding: 10px 12px;
   align-items: center;
   justify-content: space-between;
@@ -21,26 +24,16 @@ const HeaderContainer = styled.div`
 const Contents = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 4px;
 `;
 const HeaderTxt = styled.div`
   color: #58595b;
   font-weight: bold;
   font-size: 12px;
-  margin-bottom: 0.2rem;
 `;
-const Logo = styled(FontAwesomeIcon)`
-  color: #58595b;
-  float: left;
-  max-height: 10px;
-  margin-right: 4px;
-`;
-const RightLogo = styled(FontAwesomeIcon)`
-  color: #58595b;
-  float: left;
-  height: 18px;
-  weight: 18px;
-`;
-const UploadLogo = styled(FontAwesomeIcon)`
+const Logo = styled.div``;
+const UploadLogo = styled.div`
   color: white;
   float: left;
   height: 18px;
@@ -55,27 +48,6 @@ const RightIcons = styled.div`
 `;
 
 const MapHeader: React.FC = () => {
-  const navigate = useNavigate();
-
-  // //로그아웃
-  // const logoutHandler = async () => {
-  //   try {
-  //     console.log(document.cookie);
-
-  //     const response = await axios.delete(
-  //       "https://www.samsunglife.site/auth/api/authentication/logout",
-  //       {
-  //         withCredentials: true,
-  //       }
-  //     );
-  //     alert("다시 로그인 해주세요");
-  //     console.log(response.data);
-  //     navigate("/");
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
-
   const [isCompression, setIsCompression] = useState<boolean>(false);
   const setIsCompressionModal = useSetRecoilState<boolean>(
     IsCompressionModalState
@@ -91,22 +63,21 @@ const MapHeader: React.FC = () => {
   return (
     <HeaderContainer>
       <Contents>
-        <Logo icon={faShield} />
+        <Shield fill={colors.default400} />
         <HeaderTxt>SafeViewer</HeaderTxt>
       </Contents>
       <RightIcons>
         {isCompression && (
           <UploadLogo
-            icon={faUpload}
             onClick={() => {
               console.log("잉");
               setIsCompressionModal(true);
             }}
-          />
+          >
+            <Export width={18} height={18} />
+          </UploadLogo>
         )}
-        <RightLogo icon={faUser} />
       </RightIcons>
-      {/* <LogoutBtn onClick={logoutHandler} /> */}
     </HeaderContainer>
   );
 };

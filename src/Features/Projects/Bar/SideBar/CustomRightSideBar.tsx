@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { SetStateAction, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import styled from "styled-components";
+import { colors } from "../../../../Utils/colors";
 
 interface BarProps {
   setSearchTxt: React.Dispatch<SetStateAction<string>>;
@@ -31,7 +32,7 @@ interface Result {
 const SideBarContainer = styled.div`
   width: 296px;
   height: 100%;
-  background-color: #272727;
+  background-color: ${colors.default900};
   position: absolute;
   top: 40px;
   right: 0;
@@ -67,7 +68,7 @@ const TitleIcon = styled.div`
 const TitleIconText = styled.div`
   font-size: 8px;
   font-weight: bold;
-  color: #272727;
+  color: ${colors.default900};
   height: 8px;
   width: 8px;
   margin-bottom: 4px;
@@ -85,7 +86,7 @@ const SearchBar = styled.div<{ isActive: boolean }>`
 `;
 
 const SearchInput = styled.input`
-  background-color: #272727;
+  background-color: ${colors.default900};
   border: none;
   outline: none;
   font-weight: 400;

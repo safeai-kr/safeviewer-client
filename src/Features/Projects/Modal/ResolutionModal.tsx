@@ -5,6 +5,9 @@ import styled from "styled-components";
 import { ImgComparisonSlider } from "@img-comparison-slider/react";
 import useSuperResolutionApi from "../API/useSuperResolutionApi";
 import axios from "axios";
+import { colors } from "../../../Utils/colors";
+
+import { ReactComponent as Shield } from "../../../Icons/project3_shild_superresolution.svg";
 
 interface ImgProps {
   imageSrc1: string;
@@ -33,24 +36,25 @@ const ModalHeader = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #13ed0e;
+  background: ${colors.primary500};
   border: none;
 `;
 
 const Logo = styled(FontAwesomeIcon)`
   width: 0.9375vw; // 12px at 1280px width
   height: 0.9375vw;
-  color: #272727;
+  color: ${colors.default900};
   margin-right: 4px;
 `;
 
 const HeaderTxt = styled.div`
-  color: #272727;
+  color: ${colors.default900};
   text-align: center;
   font-family: Pretendard;
   font-size: 1.25vw;
   font-weight: 600;
   padding-bottom: 0.15625vw;
+  margin-left: 4px;
 `;
 
 const CloseBtn = styled.div`
@@ -90,7 +94,7 @@ const ResolutionModal: React.FC<ImgProps> = ({
   return (
     <ModalContainer>
       <ModalHeader>
-        <Logo icon={faShield} />
+        <Shield width={12} height={12} />
         <HeaderTxt>Super resolution</HeaderTxt>
         <CloseBtn
           onClick={() => {

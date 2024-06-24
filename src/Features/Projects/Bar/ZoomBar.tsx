@@ -2,6 +2,7 @@ import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import styled from "styled-components";
+import { colors } from "../../../Utils/colors";
 
 interface ZoomProps {
   handleZoomIn: () => void;
@@ -11,7 +12,7 @@ interface ZoomProps {
 const ZoomContainer = styled.div`
   position: absolute;
   top: 350px;
-  background: #272727;
+  background: ${colors.default900};
   z-index: 1000;
   display: flex;
   padding: 3px;

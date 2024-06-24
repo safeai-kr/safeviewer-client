@@ -5,7 +5,16 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import styled, { css } from "styled-components";
 import { CurrentProject } from "../Map/Data/CurrentProject";
+import { colors } from "../../Utils/colors";
+import { ReactComponent as HomeMap } from "../../Icons/default/home_map.svg";
+import { ReactComponent as IndexBox1 } from "../../Icons/default/tap_project1.svg";
+import { ReactComponent as IndexBox2 } from "../../Icons/default/tap_project2.svg";
+import { ReactComponent as IndexBox3 } from "../../Icons/default/tap_project3.svg";
+import { ReactComponent as IndexBox4 } from "../../Icons/default/tap_project4.svg";
+import { ReactComponent as IndexBox5 } from "../../Icons/default/tap_project5.svg";
+import { Icon } from "ol/style";
 
+const indexBoxArr = [IndexBox1, IndexBox2, IndexBox3, IndexBox4, IndexBox5];
 interface tabProps {
   tabs: string[];
   // setTabs?: React.Dispatch<
@@ -23,7 +32,7 @@ interface tabProps {
 }
 
 const TabMenu = styled.ul`
-  background-color: #3e3e3e;
+  background-color: ${colors.default900};
   color: rgba(255, 255, 255, 0.3);
   font-weight: 600;
   display: flex;
@@ -43,25 +52,21 @@ const TabMenu = styled.ul`
     padding: 10px 10px 10px 12px;
     font-size: 15px;
     transition: 0.5s;
-    border-right: 0.2px solid #fff;
   }
 
   .selected {
-    background-color: #58595b;
+    background-color: ${colors.default700};
     color: white;
   }
 `;
 
-const TabMainIcon = styled(FontAwesomeIcon)`
+const TabMainIcon = styled.div`
   display: flex;
-  width: 16px;
-  height: 16px;
-  padding: 12px;
+  width: 32px;
+  height: 32px;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  color: white;
-  border-right: 0.2px solid #fff;
 `;
 const IndexBox = styled.div<{ isSelected: boolean }>`
   display: flex;
@@ -97,27 +102,36 @@ const Tab: React.FC<tabProps> = ({ tabs, currentTab, setCurrentTab }) => {
     <>
       <TabMenu>
         <TabMainIcon
-          icon={faGlobe}
           onClick={() => {
             navigate("/");
           }}
-        />
-        {tabs.map((item, index) => (
-          <li
-            onClick={() => {
-              navigate(`/project/${item.replace(/(\s*)/g, "").toLowerCase()}`);
-              setCurrentTab(item);
-              setCurrentProject(item);
-            }}
-            key={index + 1}
-            className={item === currentTab ? "submenu selected" : "submenu"}
-          >
-            <TabContent>
-              <IndexBox isSelected={item === currentTab}>#{index + 1}</IndexBox>
-              {item}
-            </TabContent>
-          </li>
-        ))}
+        >
+          <HomeMap />
+        </TabMainIcon>
+        {tabs.map((item, index) => {
+          const IconComponent = indexBoxArr[index];
+          return (
+            <li
+              onClick={() => {
+                navigate(
+                  `/project/${item.replace(/(\s*)/g, "").toLowerCase()}`
+                );
+                setCurrentTab(item);
+                setCurrentProject(item);
+              }}
+              key={index + 1}
+              className={item === currentTab ? "submenu selected" : "submenu"}
+            >
+              <TabContent>
+                <IconComponent
+                  style={{ marginRight: "8px" }}
+                  fill={item === currentTab ? "white" : "#555660"}
+                />
+                {item}
+              </TabContent>
+            </li>
+          );
+        })}
       </TabMenu>
     </>
   );

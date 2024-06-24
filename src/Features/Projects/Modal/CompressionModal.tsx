@@ -2,6 +2,7 @@ import { faArrowRight, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { colors } from "../../../Utils/colors";
 
 interface FileSize {
   input_file_size: string;
@@ -31,7 +32,7 @@ const ModalBackground = styled.div`
 `;
 
 const ModalContainer = styled.div`
-  background: #272727;
+  background: ${colors.default900};
   border-radius: 12px;
   max-width: 1149px;
   max-height: 504px;
@@ -163,7 +164,7 @@ const RightBar = styled.div<{ percentage: number }>`
   min-height: 8px;
   height: ${({ percentage }) => 56 * percentage * 0.01}px;
   border-radius: 4px 4px 0px 0px;
-  background-color: #13ed0e;
+  background-color: ${colors.primary500};
 `;
 
 const TxtBox = styled.div`
@@ -196,7 +197,7 @@ const SaveButton = styled.button`
   font-size: 14px;
   font-weight: 600;
   color: white;
-  background-color: #272727;
+  background-color: ${colors.default900};
   border: 0.4px solid #fff;
   border-radius: 6px;
   cursor: pointer;

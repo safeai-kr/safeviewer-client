@@ -2,7 +2,8 @@ import { faShield } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { Dispatch, SetStateAction } from "react";
 import styled from "styled-components";
-
+import { colors } from "../../../Utils/colors";
+import { ReactComponent as Shield } from "../../../Icons/project4_modal_shield.svg";
 const ModalContainer = styled.div`
   width: 225px;
   height: 225px;
@@ -16,7 +17,7 @@ const ModalContainer = styled.div`
   align-items: center;
   gap: 44px;
   border-radius: 14px;
-  background: #272727;
+  background: ${colors.default900};
   padding: 68px 40px;
 `;
 
@@ -43,7 +44,7 @@ const SavedModal: React.FC = () => {
   return (
     <ModalContainer>
       <ModalBox>
-        <ModalIcon icon={faShield} />
+        <Shield width={52} height={56} />
         <ModalTxt>Image has been saved</ModalTxt>
       </ModalBox>
     </ModalContainer>

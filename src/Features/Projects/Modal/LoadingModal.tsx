@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { Dispatch, SetStateAction } from "react";
 import { Oval } from "react-loader-spinner";
 import styled from "styled-components";
+import { colors } from "../../../Utils/colors";
 
 const ModalContainer = styled.div`
   width: 225px;
@@ -17,7 +18,7 @@ const ModalContainer = styled.div`
   align-items: center;
   gap: 44px;
   border-radius: 14px;
-  background: #272727;
+  background: ${colors.default900};
   padding: 68px 40px;
   z-index: 2000;
 `;
