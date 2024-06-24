@@ -1,15 +1,37 @@
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faGlobe,
+  faList,
+  faRulerHorizontal,
+  faRulerVertical,
+  faSearch,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
-import styled from "styled-components";
+import React, { SetStateAction, useState } from "react";
+import styled, { css } from "styled-components";
+import { ShipList } from "../../Data/ShipList";
+
+interface SelectedShip {
+  label: string;
+  center: [number, number];
+}
+interface BarProps {
+  setSelectedShip: React.Dispatch<SetStateAction<SelectedShip | null>>;
+  selectedShip: SelectedShip | null;
+}
+interface ShipCategory {
+  id: number;
+  name: string;
+  supercategory: string;
+}
 
 const SideBarContainer = styled.div`
   width: 296px;
   height: 100%;
-  background-color: #272727;
+  background-color: #19191b;
   position: absolute;
   top: 40px;
   right: 0;
+  overflow-y: hidden;
 `;
 
 const SideBarHeader = styled.div`
@@ -29,19 +51,15 @@ const TitleText = styled.div`
 const SideBarContents = styled.div`
   display: flex;
   width: 100%;
+  height: calc(100vh - 116px);
+  overflow-y: auto;
   flex-direction: column;
   align-items: flex-start;
-`;
-const ContentsHeader = styled.div`
-  display: flex;
-  padding: 8px 12px;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 80px;
 `;
 const TxtBox = styled.div`
   display: flex;
   gap: 6px;
+  padding: 12px;
 `;
 const AllTxt = styled.text`
   color: #d5d5d5;
@@ -67,34 +85,22 @@ const NumTxt = styled.text`
   font-style: normal;
   font-weight: 600;
 `;
-const Label = styled.label`
-  display: flex;
-  align-items: stretch;
-  cursor: pointer;
-  color: #d5d5d5;
-
-  font-family: Pretendard;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 500;
-`;
-const AreaCheckBox = styled.input.attrs({ type: "checkbox" })`
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-  border: 1px solid #d5d5d5;
-  margin-right: 4px;
-`;
 const ContentsBody = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
 `;
-const ShipBox = styled.div`
+const ShipBox = styled.div<{ isSelected: boolean }>`
   display: flex;
-  width: 80%;
+  width: 100%;
   padding: 12px;
+  cursor: pointer;
   align-items: center;
+  ${({ isSelected }) =>
+    isSelected &&
+    css`
+      background: #27292e;
+    `}
 `;
 
 const ShipImg = styled.img`
@@ -127,50 +133,166 @@ const ShipSize = styled.div`
   font-style: normal;
   font-weight: 300;
 `;
-const ShipRightSideBar: React.FC = () => {
-  const handleCheckboxClick = () => {};
+const Selected = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: #19191b;
+  height: 100%;
+  padding: 12px;
+`;
+const SelectedHeader = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+`;
+const Name = styled.div`
+  color: #eeeef0;
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+`;
+const BackBtn = styled.button`
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 16px;
+  width: 18px;
+  height: 18px;
+`;
+
+const ShipBigImg = styled.img`
+  width: 80%;
+  height: auto;
+  border-radius: 8px;
+`;
+
+const Details = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 20px;
+`;
+
+const Detail = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const Logo = styled(FontAwesomeIcon)`
+  width: 12px;
+  height: 12px;
+  background-color: gray;
+  border-radius: 50%;
+`;
+const DetailTxt = styled.div`
+  color: #cdced7;
+  leading-trim: both;
+
+  text-edge: cap;
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+`;
+const ShipRightSideBar: React.FC<BarProps> = ({
+  selectedShip,
+  setSelectedShip,
+}) => {
+  console.log(selectedShip);
+  const shiparr = ShipList.categories;
+  const [selectedShipId, setSelectedShipId] = useState<number | null>(null);
+  //중앙 좌표 계산 함수
+  const calculateCenter = (corners: [number, number][]): [number, number] => {
+    const [xSum, ySum] = corners.reduce(
+      ([accX, accY], [x, y]) => [accX + x, accY + y],
+      [0, 0]
+    );
+    const centerX = xSum / corners.length;
+    const centerY = ySum / corners.length;
+    return [centerX, centerY];
+  };
+  const handleShipClick = (ship: ShipCategory) => {
+    const shipData = ShipList.list.find((s) => s.label === ship.name);
+    if (shipData) {
+      const center = calculateCenter(shipData.corners as [number, number][]);
+      setSelectedShip({ label: ship.name, center: center });
+      setSelectedShipId(ship.id);
+    }
+  };
+  const formatCoordinates = (coords: [number, number]) => {
+    const [lat, lon] = coords;
+    const formatCoord = (coord: number) => coord.toFixed(3);
+    return `${formatCoord(lat)}, ${formatCoord(lon)}`;
+  };
   return (
     <>
       <SideBarContainer>
-        <SideBarHeader>
-          <TitleText>Ship Detection</TitleText>
-        </SideBarHeader>
-        <SideBarContents>
-          <ContentsHeader>
+        {selectedShip === null && (
+          <>
+            <SideBarHeader>
+              <TitleText>Ship Detection</TitleText>
+            </SideBarHeader>
             <TxtBox>
               <AllTxt>All</AllTxt>
-              <NumTxt>124</NumTxt>
+              <NumTxt>28</NumTxt>
             </TxtBox>
-            <Label>
-              <AreaCheckBox />
-              within the current area
-            </Label>
-          </ContentsHeader>
-          {/* ShipBoxe들은 모델 연결 이후 응답에 따라 동적으로 map함수로 렌더링 */}
-          <ContentsBody>
-            <ShipBox>
-              <ShipImg src="screenshot.png" />
-              <InfoBox>
-                <ShipName>Ship_01</ShipName>
-                <ShipSize>18.5 x 200m</ShipSize>
-              </InfoBox>
-            </ShipBox>
-            <ShipBox>
-              <ShipImg src="screenshot.png" />
-              <InfoBox>
-                <ShipName>Ship_01</ShipName>
-                <ShipSize>18.5 x 200m</ShipSize>
-              </InfoBox>
-            </ShipBox>
-            <ShipBox>
-              <ShipImg src="screenshot.png" />
-              <InfoBox>
-                <ShipName>Ship_01</ShipName>
-                <ShipSize>18.5 x 200m</ShipSize>
-              </InfoBox>
-            </ShipBox>
-          </ContentsBody>
-        </SideBarContents>
+            <SideBarContents>
+              {/* ShipBoxe들은 모델 연결 이후 응답에 따라 동적으로 map함수로 렌더링 */}
+              <ContentsBody>
+                {shiparr.map((ship) => (
+                  <ShipBox
+                    key={ship.id}
+                    onClick={() => handleShipClick(ship)}
+                    isSelected={ship.id === selectedShipId}
+                  >
+                    <ShipImg
+                      src={require(`../../Data/ShipImages/${ship.name}.png`)}
+                    />
+                    <InfoBox>
+                      <ShipName>{ship.name}</ShipName>
+                      <ShipSize>18.5 x 200m</ShipSize>
+                    </InfoBox>
+                  </ShipBox>
+                ))}
+              </ContentsBody>
+            </SideBarContents>
+          </>
+        )}
+        {selectedShip !== null && (
+          <>
+            <Selected>
+              <SelectedHeader>
+                <BackBtn onClick={() => setSelectedShip(null)}>{"<"}</BackBtn>
+                <Name>{selectedShip.label}</Name>
+              </SelectedHeader>
+              <ShipBigImg
+                src={require(`../../Data/ShipImages/${selectedShip.label}.png`)}
+              />
+              <Details>
+                <Detail>
+                  <Logo icon={faGlobe} />
+                  <DetailTxt>
+                    {formatCoordinates(selectedShip.center)}
+                  </DetailTxt>
+                </Detail>
+                <Detail>
+                  <Logo icon={faRulerHorizontal} />
+                  <DetailTxt>18.5 x 117.2m</DetailTxt>
+                </Detail>
+                <Detail>
+                  <Logo icon={faList} />
+                  <DetailTxt>Container Ship</DetailTxt>
+                </Detail>
+              </Details>
+            </Selected>
+          </>
+        )}
       </SideBarContainer>
     </>
   );

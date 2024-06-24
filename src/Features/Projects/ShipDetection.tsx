@@ -1,6 +1,6 @@
 import React, { MouseEvent, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { Map, View } from "ol";
+import { Feature, Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import "ol/ol.css";
@@ -8,6 +8,7 @@ import {
   fromLonLat,
   get as getProjection,
   ProjectionLike,
+  transform,
   transformExtent,
 } from "ol/proj";
 import styled, { css } from "styled-components";
@@ -22,25 +23,24 @@ import ShipRightSideBar from "./Bar/SideBar/ShipRightSideBar";
 import SelectionCloseBtn from "./Component/SelectionCloseBtn";
 import ShipMainTip from "./ToolTip/ShipMainTip";
 import ShipSideTip from "./ToolTip/ShipSideTip";
-
+import VectorSource from "ol/source/Vector";
+import { Polygon } from "ol/geom";
+import { Fill, Stroke, Style } from "ol/style";
+import { ShipList } from "./Data/ShipList";
+import VectorLayer from "ol/layer/Vector";
+import Select from "ol/interaction/Select";
+import { click } from "ol/events/condition";
+import { Coordinate } from "ol/coordinate";
 interface Selection {
   x: number;
   y: number;
   width: number;
   height: number;
 }
-interface Prediction {
-  label: number;
-  score: number;
-  box: [number, number, number, number]; // [x1, y1, x2, y2]
+interface SelectedShip {
+  label: string;
+  center: [number, number];
 }
-
-interface ApiResponse {
-  image_url: string;
-  candidate_labels: string;
-  predictions: string; // json으로 파싱
-}
-
 const ProjectMap = styled.div<{ isToolIng: boolean }>`
   width: calc(100% - 296px);
   height: 100vh;
@@ -111,9 +111,6 @@ const SelectedBox = styled.div`
 const ShipDetection: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const mutation = useDetectionApi();
-
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
 
   // 기본값 설정
   const [longitude, setLongitude] = useState<number>(126.837598615);
@@ -138,8 +135,6 @@ const ShipDetection: React.FC = () => {
   );
   //스크린샷 url
   const [screenshotUrl, setScreenshotUrl] = useState<string>("");
-  //이미지 base64인코딩 string
-  const [imageStr, setImageStr] = useState<string | "">("");
 
   //사진 레이어 추가용 state
   const [wmtsLayer, setWmtsLayer] = useState<TileLayer<WMTS> | null>(null);
@@ -151,6 +146,9 @@ const ShipDetection: React.FC = () => {
   //툴팁 진행 상태
   const [isToolIng, setIsToolIng] = useState<boolean>(true);
 
+  //선택된 배
+  const [selectedShip, setSelectedShip] = useState<SelectedShip | null>(null);
+
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -160,8 +158,8 @@ const ShipDetection: React.FC = () => {
     );
     const initialView = new View({
       center: initialCoordinates,
-      zoom: 14, // 초기 줌 레벨
-      minZoom: 12, // 최소 줌 레벨
+      zoom: 16.5, // 초기 줌 레벨
+      minZoom: 16.5, // 최소 줌 레벨
       maxZoom: 21, // 최대 줌 레벨
       projection: "EPSG:3857",
     });
@@ -239,34 +237,12 @@ const ShipDetection: React.FC = () => {
     };
   }, []);
 
-  //Detection API 호출
-  const handleApiCall = () => {
-    if (!imageStr) return;
-    console.log(imageStr);
-    const requestData = {
-      image_base64: imageStr,
-      candidate_labels: "ship",
-    };
-
-    mutation.mutate(requestData, {
-      onSuccess: (response) => {
-        console.log("API call success:", response);
-        // const apiResponse = response.data.predictions[0] as ApiResponse;
-        // const parsedPredictions = JSON.parse(apiResponse.predictions); //JSON.parse(): JSON 문자열을 JavaScript 객체로 변환
-        // setPredictions(parsedPredictions);
-      },
-      onError: (error) => {
-        console.error("API call error:", error);
-      },
-    });
-  };
-
   //줌 인/아웃
   const handleZoomIn = () => {
     if (view) {
       const zoom = view.getZoom();
       if (zoom !== undefined) {
-        view.animate({ zoom: zoom + 1, duration: 300 });
+        view.animate({ zoom: zoom + 0.5, duration: 300 });
       }
     }
   };
@@ -275,7 +251,7 @@ const ShipDetection: React.FC = () => {
     if (view) {
       const zoom = view.getZoom();
       if (zoom !== undefined) {
-        view.animate({ zoom: zoom - 1, duration: 300 });
+        view.animate({ zoom: zoom - 0.5, duration: 300 });
       }
     }
   };
@@ -349,13 +325,6 @@ const ShipDetection: React.FC = () => {
     setSelection(newSelection);
   };
 
-  // 데이터 URL에서 base64 인코딩된 부분을 추출
-  const dataURLtoBase64 = (dataurl: string): string => {
-    if (!dataurl) return "";
-    const arr = dataurl.split(",");
-    return arr[1]; // base64 인코딩된 데이터 부분만 리턴
-  };
-
   const handleMapMouseUp = (e: MouseEvent<HTMLDivElement>) => {
     if (selectedTool !== "drag") return;
     setStartPoint(null);
@@ -395,7 +364,6 @@ const ShipDetection: React.FC = () => {
 
     const dataUrl = croppedCanvas?.toDataURL("image/png");
     setScreenshotUrl(dataUrl);
-    setImageStr(dataURLtoBase64(dataUrl));
     setIsSelected(true);
   };
 
@@ -411,18 +379,145 @@ const ShipDetection: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    //마우스를 뗐을 때 바로 이미지 다운로드
-    if (screenshotUrl) {
-      handleApiCall();
-      // downloadLinkRef.current?.click();
-    }
-  }, [screenshotUrl]);
+  //중앙 좌표 계산 함수
 
-  // //api 호출 정상적으로 작동하는지 테스트용 코드
-  // useEffect(() => {
-  //   handleApiCall();
-  // }, []);
+  const calculateCenter = (corners: Coordinate[]): Coordinate => {
+    const [xSum, ySum] = corners.reduce(
+      ([accX, accY], [x, y]) => [accX + x, accY + y],
+      [0, 0]
+    );
+    const centerX = xSum / corners.length;
+    const centerY = ySum / corners.length;
+    return [centerX, centerY];
+  };
+
+  const rotatePoint = (
+    x: number,
+    y: number,
+    cx: number,
+    cy: number,
+    angle: number
+  ): Coordinate => {
+    const adjustedAngle = angle * 0.98; // 각도를 약간 더 크게 조정 (다른 값으로 변경 시도)
+    const radians = (Math.PI / 180) * adjustedAngle;
+    const cos = Math.cos(radians);
+    const sin = Math.sin(radians);
+    const nx = cos * (x - cx) + sin * (y - cy) + cx;
+    const ny = -sin * (x - cx) + cos * (y - cy) + cy;
+    return [nx, ny];
+  };
+
+  // 기준점 (126.82416667, 36.9754555)
+  const referencePoint: [number, number] = [126.82416667, 36.9754555];
+
+  // 픽셀 좌표를 위경도로 변환하는 함수
+  const pixelToLatLon = (
+    x: number,
+    y: number,
+    reference: [number, number],
+    imageWidth: number,
+    imageHeight: number
+  ): [number, number] => {
+    const lat = reference[1] - (y / imageHeight) * (reference[1] - 36.94940278); // 이미지 높이와 경도 범위를 사용하여 변환
+    const lon = reference[0] + (x / imageWidth) * (126.85103056 - reference[0]); // 이미지 너비와 위도 범위를 사용하여 변환
+    return [lon, lat];
+  };
+
+  //bbox그리기
+  const drawBoundingBoxes = (
+    map: Map | null,
+    selectedShip: SelectedShip | null,
+    setSelectedShip: (ship: SelectedShip | null) => void
+  ) => {
+    if (!map) return;
+
+    const vectorSource = new VectorSource();
+
+    ShipList.list.forEach((ship) => {
+      const [xtl, ytl, width, height] = ship.bbox;
+      const xbr = xtl + width;
+      const ybr = ytl + height;
+
+      // 픽셀 좌표를 위경도로 변환
+      const corners: Coordinate[] = [
+        pixelToLatLon(xtl, ytl, referencePoint, 9324, 11508),
+        pixelToLatLon(xbr, ytl, referencePoint, 9324, 11508),
+        pixelToLatLon(xbr, ybr, referencePoint, 9324, 11508),
+        pixelToLatLon(xtl, ybr, referencePoint, 9324, 11508),
+      ];
+
+      // 중심점 계산
+      const center = calculateCenter(corners);
+      const rotation = ship.rotation || 0;
+
+      // 좌표 회전
+      const rotatedCorners = corners.map(([lon, lat]) =>
+        rotatePoint(lon, lat, center[0], center[1], rotation)
+      );
+
+      // 좌표 변환
+      const transformedCorners = rotatedCorners.map((corner) =>
+        transform(corner, "EPSG:4326", "EPSG:3857")
+      );
+
+      const polygon = new Polygon([transformedCorners]);
+      const feature = new Feature(polygon);
+      feature.setStyle(
+        new Style({
+          stroke: new Stroke({
+            color:
+              selectedShip && selectedShip.label === ship.label
+                ? "#F12FDE"
+                : "#16E78F",
+            width: 2,
+          }),
+          fill: new Fill({
+            color: "rgba(0, 0, 0, 0)", // 내부를 채우지 않도록 투명 색상 설정
+          }),
+        })
+      );
+      feature.setId(ship.label); // 설정된 id로 기능 식별
+      feature.set("center", calculateCenter(ship.corners as Coordinate[])); // 중앙 좌표 설정
+      vectorSource.addFeature(feature);
+    });
+
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+    });
+
+    map.addLayer(vectorLayer);
+
+    const selectInteraction = new Select({
+      condition: click,
+      style: new Style({
+        stroke: new Stroke({
+          color: "#F12FDE",
+          width: 2,
+        }),
+        fill: new Fill({
+          color: "rgba(0, 0, 0, 0)",
+        }),
+      }),
+    });
+
+    selectInteraction.on("select", (e) => {
+      const selectedFeatures = e.target.getFeatures();
+      const selected = selectedFeatures.item(0);
+      if (selected) {
+        setSelectedShip({
+          label: selected.getId() as string,
+          center: selected.get("center"),
+        });
+      } else {
+        setSelectedShip(null);
+      }
+    });
+
+    map.addInteraction(selectInteraction);
+  };
+  useEffect(() => {
+    drawBoundingBoxes(map.current, selectedShip, setSelectedShip);
+  }, [selectedShip]);
 
   return (
     <>
@@ -482,7 +577,10 @@ const ShipDetection: React.FC = () => {
           </>
         )}
       </ProjectMap>
-      <ShipRightSideBar />
+      <ShipRightSideBar
+        selectedShip={selectedShip}
+        setSelectedShip={setSelectedShip}
+      />
     </>
   );
 };
