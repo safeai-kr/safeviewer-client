@@ -1,8 +1,32 @@
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { SetStateAction, useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import styled from "styled-components";
+
+interface BarProps {
+  setSearchTxt: React.Dispatch<SetStateAction<string>>;
+  isLoading: boolean;
+  modelOutput: ModelOutput | null;
+  searchTxt: string;
+}
+
+interface FormInputs {
+  searchInput: string;
+}
+
+interface ModelOutput {
+  image_url: string;
+  results: string;
+  status: string;
+  status_message: string;
+}
+
+interface Result {
+  label: number;
+  score: number;
+  oriented_bbox: [number, number][];
+}
 
 const SideBarContainer = styled.div`
   width: 296px;
@@ -21,11 +45,13 @@ const SideBarHeader = styled.div`
   height: 48px;
   padding: 12px;
 `;
+
 const TitleText = styled.div`
   color: white;
   font-size: 14px;
   font-weight: 600;
 `;
+
 const TitleIcon = styled.div`
   background-color: #00ff94;
   padding: 2px 4px;
@@ -37,6 +63,7 @@ const TitleIcon = styled.div`
   height: 12px;
   width: 17px;
 `;
+
 const TitleIconText = styled.div`
   font-size: 8px;
   font-weight: bold;
@@ -45,6 +72,7 @@ const TitleIconText = styled.div`
   width: 8px;
   margin-bottom: 4px;
 `;
+
 const SearchBar = styled.div<{ isActive: boolean }>`
   display: flex;
   height: 36px;
@@ -55,6 +83,7 @@ const SearchBar = styled.div<{ isActive: boolean }>`
   border: 1px solid ${({ isActive }) => (isActive ? "#00FF94" : "#58595b")};
   margin: 0px 12px;
 `;
+
 const SearchInput = styled.input`
   background-color: #272727;
   border: none;
@@ -69,12 +98,14 @@ const SearchInput = styled.input`
     color: #58595b;
   }
 `;
+
 const SearchIcon = styled(FontAwesomeIcon)`
   color: #58595b;
   width: 16px;
   height: 16px;
   cursor: pointer;
 `;
+
 const OptionsArea = styled.div`
   gap: 10px;
   margin: 20px 12px;
@@ -92,6 +123,7 @@ const OptionsArea = styled.div`
   font-style: normal;
   font-weight: 500;
 `;
+
 const Option = styled.div`
   display: flex;
   padding: 8px 12px;
@@ -101,19 +133,141 @@ const Option = styled.div`
   background-color: #3e3e40;
   cursor: pointer;
 `;
-const CustomRightSideBar: React.FC = () => {
-  const [isActive, setIsActive] = useState<boolean>(false);
-  const { register, setValue } = useForm();
+
+const ResultContainer = styled.div`
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+`;
+
+const ResultTotal = styled.div`
+  color: #cdced7;
+  font-family: Pretendard;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+`;
+
+const ResultContents = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+`;
+
+const LabelContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const ResultTxt = styled.div`
+  color: #cdced7;
+  font-family: Pretendard;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  margin-left: 6px;
+`;
+
+const ResultAmount = styled.div`
+  color: #cdced7;
+  text-align: right;
+  font-family: Pretendard;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+`;
+
+const ColorBox = styled.div<{ color: string }>`
+  width: 8px;
+  height: 8px;
+  background-color: ${({ color }) => color};
+  border-radius: 2px;
+`;
+
+const CustomRightSideBar: React.FC<BarProps> = ({
+  setSearchTxt,
+  searchTxt,
+  isLoading,
+  modelOutput,
+}) => {
+  const [filteredResults, setFilteredResults] = useState<Result[]>([]);
+
+  useEffect(() => {
+    if (!modelOutput) return;
+
+    const results: Result[] = JSON.parse(modelOutput.results);
+    let filtered: Result[] = [];
+
+    switch (searchTxt) {
+      case "Find the cars":
+        filtered = results.filter(
+          (result) => result.label === 9 || result.label === 10
+        );
+        break;
+      case "How many containers are there in this area?":
+        filtered = results.filter((result) => result.label === 2);
+        break;
+      case "Select all objects in this area":
+      default:
+        filtered = results;
+        break;
+    }
+
+    setFilteredResults(filtered);
+  }, [modelOutput, searchTxt]);
+
+  const labelColorMap: { [key: number]: string } = {
+    0: "#FF9635",
+    1: "#16E78F",
+    2: "#FF42EC",
+    9: "#E1FF27",
+    10: "#E1FF27",
+  };
+
+  const labelNameMap: { [key: number]: string } = {
+    0: "Plane",
+    1: "Ship",
+    2: "Storage Tank",
+    9: "Vehicle",
+    10: "Vehicle",
+  };
+
   const options = [
-    "Find the white cars",
-    "Select all objects in this area",
+    "Find the cars",
     "How many containers are there in this area?",
-    "Select all cars in this area",
+    "Select all objects in this area",
   ];
+
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const { register, setValue, handleSubmit } = useForm<FormInputs>();
+
   const handleOptionClick = (text: string) => {
     setValue("searchInput", text);
   };
-  const handleSubmit = () => {};
+
+  const onSubmit: SubmitHandler<FormInputs> = (data: {
+    searchInput: string;
+  }) => {
+    setSearchTxt(data.searchInput);
+  };
+
+  useEffect(() => {
+    if (!isLoading) setValue("searchInput", "");
+  }, [isLoading]);
+
+  const labelCounts = filteredResults.reduce(
+    (acc: { [key: number]: number }, result) => {
+      acc[result.label] = (acc[result.label] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
+
+  const totalCount = filteredResults.length;
+
   return (
     <>
       <SideBarContainer>
@@ -123,24 +277,48 @@ const CustomRightSideBar: React.FC = () => {
             <TitleIconText>AI</TitleIconText>
           </TitleIcon>
         </SideBarHeader>
-        <SearchBar
-          isActive={isActive}
-          onClick={() => setIsActive(true)}
-          onBlur={() => setIsActive(false)}
-        >
-          <SearchInput
-            placeholder="Search by specifying an area"
-            {...register("searchInput")}
-          />
-          <SearchIcon onClick={() => handleSubmit()} icon={faSearch} />
-        </SearchBar>
-        <OptionsArea>
-          {options.map((option, index) => (
-            <Option key={index} onClick={() => handleOptionClick(option)}>
-              {option}
-            </Option>
-          ))}
-        </OptionsArea>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <SearchBar
+            isActive={isActive}
+            onClick={() => setIsActive(true)}
+            onBlur={() => setIsActive(false)}
+          >
+            <SearchInput
+              placeholder="Search by specifying an area"
+              {...register("searchInput")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSubmit(onSubmit)();
+                }
+              }}
+            />
+            <SearchIcon onClick={handleSubmit(onSubmit)} icon={faSearch} />
+          </SearchBar>
+        </form>
+        {!modelOutput && (
+          <OptionsArea>
+            {options.map((option, index) => (
+              <Option key={index} onClick={() => handleOptionClick(option)}>
+                {option}
+              </Option>
+            ))}
+          </OptionsArea>
+        )}
+        {modelOutput && (
+          <ResultContainer>
+            <ResultTotal>{totalCount} results</ResultTotal>
+            {Object.entries(labelCounts).map(([label, count]) => (
+              <ResultContents key={label}>
+                <LabelContainer>
+                  <ColorBox color={labelColorMap[parseInt(label, 10)]} />
+                  <ResultTxt>{labelNameMap[parseInt(label, 10)]}</ResultTxt>
+                </LabelContainer>
+                <ResultAmount>{count}</ResultAmount>
+              </ResultContents>
+            ))}
+          </ResultContainer>
+        )}
       </SideBarContainer>
     </>
   );

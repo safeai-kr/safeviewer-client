@@ -1,6 +1,6 @@
 import React, { MouseEvent, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { Map, View } from "ol";
+import { Feature, Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import "ol/ol.css";
@@ -23,6 +23,12 @@ import CustomRightSideBar from "./Bar/SideBar/CustomRightSideBar";
 import SelectionCloseBtn from "./Component/SelectionCloseBtn";
 import DragTip from "./ToolTip/DragTip";
 import CustomSideTip from "./ToolTip/CustomSideTip";
+import axios from "axios";
+import LoadingModal from "./Modal/LoadingModal";
+import VectorSource from "ol/source/Vector";
+import { Polygon } from "ol/geom";
+import { Fill, Stroke, Style } from "ol/style";
+import VectorLayer from "ol/layer/Vector";
 
 interface Selection {
   x: number;
@@ -36,10 +42,17 @@ interface Prediction {
   box: [number, number, number, number]; // [x1, y1, x2, y2]
 }
 
-interface ApiResponse {
+interface Result {
+  label: number;
+  score: number;
+  oriented_bbox: [number, number][];
+}
+
+interface ModelOutput {
   image_url: string;
-  candidate_labels: string;
-  predictions: string; // json으로 파싱
+  results: string;
+  status: string;
+  status_message: string;
 }
 
 const ProjectMap = styled.div<{ isToolIng: boolean }>`
@@ -139,8 +152,6 @@ const CustomDetection: React.FC = () => {
   );
   //스크린샷 url
   const [screenshotUrl, setScreenshotUrl] = useState<string>("");
-  //이미지 blob객체
-  const [imageStr, setImageStr] = useState<string | "">("");
 
   //사진 레이어 추가용 state
   const [wmtsLayer, setWmtsLayer] = useState<TileLayer<WMTS> | null>(null);
@@ -151,6 +162,15 @@ const CustomDetection: React.FC = () => {
 
   //툴팁 진행 상태
   const [isToolIng, setIsToolIng] = useState<boolean>(true);
+
+  //prediction output
+  const [modelOutput, setModelOutput] = useState<ModelOutput | null>(null);
+  //api요청 로딩상태
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  //검색 상태
+  const [searchTxt, setSearchTxt] = useState<string>("");
+
+  //지도 표출
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -160,8 +180,8 @@ const CustomDetection: React.FC = () => {
     );
     const initialView = new View({
       center: initialCoordinates,
-      zoom: 14, // 초기 줌 레벨
-      minZoom: 6, // 최소 줌 레벨
+      zoom: 16.5, // 초기 줌 레벨
+      minZoom: 16.5, // 최소 줌 레벨
       maxZoom: 21, // 최대 줌 레벨
       projection: "EPSG:3857",
     });
@@ -238,26 +258,173 @@ const CustomDetection: React.FC = () => {
   }, []);
 
   //Detection API 호출
-  const handleApiCall = () => {
-    if (!imageStr) return;
-    // console.log(imageStr);
+  const handleApiCall = async () => {
+    if (!screenshotUrl) return;
+    setIsLoading(true);
+    // GCS 버킷에 파일 업로드
+    const model_name = "owlvit"; // 모델이름
+    const timestamp_date = new Date()
+      .toISOString()
+      .split("T")[0]
+      .replace(/-/g, "");
+    //파일 경로
+    const fileName = `bentoml/${model_name}/${timestamp_date}/input/detection_img_${new Date().getTime()}.png`;
+    const blob = await fetch(screenshotUrl).then((res) => res.blob());
+
+    //버킷에 파일 올리는 url 요청
+    const response = await axios.post(
+      `https://storage.googleapis.com/upload/storage/v1/b/ml-input-image/o?uploadType=media&name=${fileName}`,
+      blob,
+      {
+        headers: {
+          "Content-Type": "image/png",
+        },
+      }
+    );
+
+    //파일이 업로드 된 버킷의 URL
+    const gcsURL = `https://storage.googleapis.com/ml-input-image/${fileName}`;
     const requestData = {
-      image_base64: imageStr,
-      candidate_labels: "boat",
+      image_url: gcsURL,
     };
 
+    //버킷 URL을 통해 서버에 Compression 요청
     mutation.mutate(requestData, {
-      onSuccess: (response) => {
+      onSuccess: async (response) => {
         console.log("API call success:", response);
-        // const apiResponse = response.data.predictions[0] as ApiResponse;
-        // const parsedPredictions = JSON.parse(apiResponse.predictions); //JSON.parse(): JSON 문자열을 JavaScript 객체로 변환
-        // setPredictions(parsedPredictions);
+
+        const task_id = response.data.task_id;
+        console.log(task_id);
+        if (!modelOutput && task_id) {
+          const fetchStatus = async () => {
+            try {
+              const statusResponse = await axios.post(
+                "https://mlapi.safeai.kr/detection/predict/status",
+                {
+                  task_id: task_id,
+                }
+              );
+              console.log(statusResponse);
+
+              const outputFromStatus = statusResponse.data.model_output[0];
+              if (outputFromStatus) {
+                setModelOutput(outputFromStatus);
+                setIsLoading(false);
+                clearInterval(statusInterval); // 요청 멈추기
+              }
+            } catch (error) {
+              console.error("Error: ", error);
+            }
+          };
+          // 1.5초마다 fetchStatus 함수 호출
+          const statusInterval = setInterval(fetchStatus, 1500);
+        }
       },
       onError: (error) => {
         console.error("API call error:", error);
       },
     });
   };
+
+  /**
+   * 이미지의 픽셀 좌표를 EPSG:4326 (위경도) 좌표로 변환합니다.
+   * @param {number[]} pixel - [x, y] 형태의 픽셀 좌표
+   * @param {number[]} extent - 이미지의 extent (EPSG:4326)
+   * @param {number} imageWidth - 이미지의 너비 (픽셀)
+   * @param {number} imageHeight - 이미지의 높이 (픽셀)
+   * @returns {number[]} - [lon, lat] 형태의 위경도 좌표
+   */
+  const pixelToLatLon = (
+    pixel: [number, number],
+    extent: [number, number, number, number],
+    selection: Selection
+  ): [number, number] => {
+    const [minLon, minLat, maxLon, maxLat] = extent;
+
+    const relativeX = minLon + (pixel[0] / selection.width) * (maxLon - minLon);
+    const relativeY =
+      maxLat - (pixel[1] / selection.height) * (maxLat - minLat);
+
+    return [relativeX, relativeY];
+  };
+
+  // bbox그리기
+  const drawBoundingBoxes = (modelOutput: ModelOutput) => {
+    if (!map.current || !modelOutput || !selection) return;
+    console.log(modelOutput);
+    const vectorSource = new VectorSource();
+    if (selection === null) return;
+    // selection의 좌표를 이용해 extent 설정
+
+    // selection의 절대적인 위경도 좌표 계산
+    const topLeft = map.current.getCoordinateFromPixel([
+      selection.x,
+      selection.y,
+    ]);
+    const bottomRight = map.current.getCoordinateFromPixel([
+      selection.x + selection.width,
+      selection.y + selection.height,
+    ]);
+
+    const [minLon, maxLat] = transform(topLeft, "EPSG:3857", "EPSG:4326");
+    const [maxLon, minLat] = transform(bottomRight, "EPSG:3857", "EPSG:4326");
+
+    const selectionExtent: [number, number, number, number] = [
+      minLon,
+      minLat,
+      maxLon,
+      maxLat,
+    ];
+    console.log(selectionExtent);
+    if (!modelOutput.results) return;
+    const results: Result[] = JSON.parse(modelOutput.results);
+
+    if (!results || results.length === 0) return;
+    console.log(results);
+
+    results.forEach((result) => {
+      const bboxCoords = result.oriented_bbox.map((point) => {
+        const latLon = pixelToLatLon(point, selectionExtent, selection);
+        return transform(latLon, "EPSG:4326", "EPSG:3857");
+      });
+      console.log(bboxCoords);
+      const labelColorMap: { [key: number]: string } = {
+        0: "#FF9635",
+        1: "#16E78F",
+        2: "#FF42EC",
+        9: "#E1FF27",
+        10: "#E1FF27",
+      };
+      const polygon = new Polygon([bboxCoords]);
+      const feature = new Feature(polygon);
+
+      feature.setStyle(
+        new Style({
+          stroke: new Stroke({
+            color: labelColorMap[result.label] || "#F12FDE",
+            width: 2,
+          }),
+          fill: new Fill({
+            color: "rgba(0, 0, 0, 0)",
+          }),
+        })
+      );
+
+      vectorSource.addFeature(feature);
+    });
+
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+    });
+
+    map.current.addLayer(vectorLayer);
+  };
+
+  useEffect(() => {
+    if (modelOutput) {
+      drawBoundingBoxes(modelOutput);
+    }
+  }, [modelOutput]);
 
   //줌 인/아웃
   const handleZoomIn = () => {
@@ -335,18 +502,6 @@ const CustomDetection: React.FC = () => {
 
     const rect = mapRef?.current?.getBoundingClientRect();
     if (!rect) return;
-
-    // const width = Math.max(
-    //   Math.abs(e.clientX - rect.left - startPoint.x),
-    //   Math.abs(e.clientY - rect.top - startPoint.y)
-    // );
-    // const height = Math.max(
-    //   Math.abs(e.clientX - rect.left - startPoint.x),
-    //   Math.abs(e.clientY - rect.top - startPoint.y)
-    // );
-
-    //e.clientX와Y는 현재 마우스 지점
-
     const newSelection = {
       x: Math.min(startPoint.x, e.clientX - rect.left),
       y: Math.min(startPoint.y, e.clientY - rect.top),
@@ -356,13 +511,6 @@ const CustomDetection: React.FC = () => {
 
     //실제 영역 설정
     setSelection(newSelection);
-  };
-
-  // 데이터 URL에서 base64 인코딩된 부분을 추출
-  const dataURLtoBase64 = (dataurl: string): string => {
-    if (!dataurl) return "";
-    const arr = dataurl.split(",");
-    return arr[1]; // base64 인코딩된 데이터 부분만 리턴
   };
 
   const handleMapMouseUp = (e: MouseEvent<HTMLDivElement>) => {
@@ -404,7 +552,6 @@ const CustomDetection: React.FC = () => {
 
     const dataUrl = croppedCanvas?.toDataURL("image/png");
     setScreenshotUrl(dataUrl);
-    setImageStr(dataURLtoBase64(dataUrl));
     setIsSelected(true);
   };
 
@@ -422,18 +569,18 @@ const CustomDetection: React.FC = () => {
 
   //영역 지정하면 api호출
   useEffect(() => {
-    if (imageStr) {
+    if (screenshotUrl && searchTxt) {
       handleApiCall();
     }
-  }, [imageStr]);
+  }, [screenshotUrl, searchTxt]);
 
-  // //api 호출 정상적으로 작동하는지 테스트용 코드
-  // useEffect(() => {
-  //   handleApiCall();
-  // }, []);
-
+  useEffect(() => {
+    setSelectedTool(null);
+    setIsLoading(false);
+  }, []);
   return (
     <>
+      {isLoading && <LoadingModal />}
       {isDragTip && (
         <DragTip setIsDragTip={setIsDragTip} setIsSideTip={setIsSideTip} />
       )}
@@ -488,7 +635,12 @@ const CustomDetection: React.FC = () => {
         )}
       </ProjectMap>
 
-      <CustomRightSideBar />
+      <CustomRightSideBar
+        isLoading={isLoading}
+        searchTxt={searchTxt}
+        setSearchTxt={setSearchTxt}
+        modelOutput={modelOutput}
+      />
     </>
   );
 };
