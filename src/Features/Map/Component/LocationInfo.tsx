@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { colors } from "../../../Utils/colors";
 
@@ -7,6 +7,22 @@ interface LocationInfoProps {
   country: string;
   position: number[];
 }
+
+const LocationInfo: React.FC<LocationInfoProps> = ({
+  locationName,
+  country,
+  position,
+}) => {
+  useEffect(() => {
+    if (position === null) return;
+  }, [position]);
+  return (
+    <LocationContainer position={position}>
+      <BigTxt>{locationName}</BigTxt>
+      <SmallTxt>{country}</SmallTxt>
+    </LocationContainer>
+  );
+};
 
 const LocationContainer = styled.div<{ position: number[] }>`
   display: flex;
@@ -51,17 +67,5 @@ const SmallTxt = styled.div`
   font-style: normal;
   font-weight: 600;
 `;
-const LocationInfo: React.FC<LocationInfoProps> = ({
-  locationName,
-  country,
-  position,
-}) => {
-  return (
-    <LocationContainer position={position}>
-      <BigTxt>{locationName}</BigTxt>
-      <SmallTxt>{country}</SmallTxt>
-    </LocationContainer>
-  );
-};
 
 export default LocationInfo;
