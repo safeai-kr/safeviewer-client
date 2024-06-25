@@ -1,6 +1,6 @@
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { SetStateAction, useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import styled from "styled-components";
 import { colors } from "../../../../Utils/colors";
@@ -10,6 +10,8 @@ interface BarProps {
   isLoading: boolean;
   modelOutput: ModelOutput | null;
   searchTxt: string;
+  selection: Selection | null;
+  isSelected: boolean;
 }
 
 interface FormInputs {
@@ -27,6 +29,12 @@ interface Result {
   label: number;
   score: number;
   oriented_bbox: [number, number][];
+}
+interface Selection {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 const SideBarContainer = styled.div`
@@ -193,33 +201,9 @@ const CustomRightSideBar: React.FC<BarProps> = ({
   searchTxt,
   isLoading,
   modelOutput,
+  selection,
+  isSelected,
 }) => {
-  const [filteredResults, setFilteredResults] = useState<Result[]>([]);
-
-  useEffect(() => {
-    if (!modelOutput) return;
-
-    const results: Result[] = JSON.parse(modelOutput.results);
-    let filtered: Result[] = [];
-
-    switch (searchTxt) {
-      case "Find the cars":
-        filtered = results.filter(
-          (result) => result.label === 9 || result.label === 10
-        );
-        break;
-      case "How many containers are there in this area?":
-        filtered = results.filter((result) => result.label === 2);
-        break;
-      case "Select all objects in this area":
-      default:
-        filtered = results;
-        break;
-    }
-
-    setFilteredResults(filtered);
-  }, [modelOutput, searchTxt]);
-
   const labelColorMap: { [key: number]: string } = {
     0: "#FF9635",
     1: "#16E78F",
@@ -237,14 +221,46 @@ const CustomRightSideBar: React.FC<BarProps> = ({
   };
 
   const options = [
-    "Find the cars",
-    "How many containers are there in this area?",
-    "Select all objects in this area",
+    "How many storage tanks are there?",
+    "Find the vehicles",
+    "Search all objects in this area",
   ];
 
-  const [isActive, setIsActive] = useState<boolean>(false);
-  const { register, setValue, handleSubmit } = useForm<FormInputs>();
+  const [filteredResults, setFilteredResults] = useState<Result[]>([]);
+  const totalCount = filteredResults.length;
+  const labelCounts = filteredResults.reduce(
+    (acc: { [key: number]: number }, result) => {
+      acc[result.label] = (acc[result.label] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
+  useEffect(() => {
+    if (!modelOutput) return;
 
+    const results: Result[] = JSON.parse(modelOutput.results);
+
+    switch (searchTxt) {
+      case "Find the vehicles":
+        setFilteredResults(
+          results.filter((result) => result.label === 9 || result.label === 10)
+        );
+        break;
+      case "How many storage tanks are there?":
+        setFilteredResults(results.filter((result) => result.label === 2));
+        break;
+      case "Search all objects in this area":
+      default:
+        setFilteredResults(results);
+        break;
+    }
+  }, [modelOutput, searchTxt]);
+
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const { register, setValue, handleSubmit, watch } = useForm<FormInputs>();
+  const searchBarRef = useRef<HTMLInputElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const { ref, ...rest } = register("searchInput");
   const handleOptionClick = (text: string) => {
     setValue("searchInput", text);
   };
@@ -259,15 +275,16 @@ const CustomRightSideBar: React.FC<BarProps> = ({
     if (!isLoading) setValue("searchInput", "");
   }, [isLoading]);
 
-  const labelCounts = filteredResults.reduce(
-    (acc: { [key: number]: number }, result) => {
-      acc[result.label] = (acc[result.label] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
-
-  const totalCount = filteredResults.length;
+  useEffect(() => {
+    const subscription = watch((value) => {
+      if (value.searchInput) {
+        setIsActive(true);
+        searchBarRef.current?.click();
+        searchInputRef.current?.focus();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   return (
     <>
@@ -283,10 +300,15 @@ const CustomRightSideBar: React.FC<BarProps> = ({
             isActive={isActive}
             onClick={() => setIsActive(true)}
             onBlur={() => setIsActive(false)}
+            ref={searchBarRef}
           >
             <SearchInput
+              {...rest}
+              ref={(e) => {
+                ref(e);
+                searchInputRef.current = e;
+              }}
               placeholder="Search by specifying an area"
-              {...register("searchInput")}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -297,7 +319,7 @@ const CustomRightSideBar: React.FC<BarProps> = ({
             <SearchIcon onClick={handleSubmit(onSubmit)} icon={faSearch} />
           </SearchBar>
         </form>
-        {!modelOutput && (
+        {!modelOutput && isSelected && (
           <OptionsArea>
             {options.map((option, index) => (
               <Option key={index} onClick={() => handleOptionClick(option)}>
@@ -306,7 +328,7 @@ const CustomRightSideBar: React.FC<BarProps> = ({
             ))}
           </OptionsArea>
         )}
-        {modelOutput && (
+        {modelOutput && !isLoading && (
           <ResultContainer>
             <ResultTotal>{totalCount} results</ResultTotal>
             {Object.entries(labelCounts).map(([label, count]) => (
