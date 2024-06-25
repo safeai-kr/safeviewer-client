@@ -64,7 +64,7 @@ const MapView: React.FC = () => {
           position: position,
         };
       })
-    : [];
+    : locationInfoPositions;
 
   const markerPosition = [
     {
