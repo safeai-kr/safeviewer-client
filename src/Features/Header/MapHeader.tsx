@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShield, faUpload, faUser } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useNavigation } from "react-router-dom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { CurrentProject } from "../Map/Data/CurrentProject";
 import { IsCompressionModalState } from "../Map/Data/IsCompressionModalState";
@@ -31,14 +31,15 @@ const HeaderTxt = styled.div`
   color: #58595b;
   font-weight: bold;
   font-size: 12px;
+  cursor: pointer;
 `;
-const Logo = styled.div``;
 const UploadLogo = styled.div`
   color: white;
   float: left;
   height: 18px;
   weight: 18px;
   cursor: pointer;
+  margin-right: 40px;
 `;
 const RightIcons = styled.div`
   display: flex;
@@ -60,11 +61,12 @@ const MapHeader: React.FC = () => {
       setIsCompression(false);
     }
   }, [currentProject]);
+  const navigate = useNavigate();
   return (
     <HeaderContainer>
       <Contents>
         <Shield fill={colors.default400} />
-        <HeaderTxt>SafeViewer</HeaderTxt>
+        <HeaderTxt onClick={() => navigate("./")}>SafeViewer</HeaderTxt>
       </Contents>
       <RightIcons>
         {isCompression && (

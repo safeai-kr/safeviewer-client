@@ -41,7 +41,6 @@ const TabMenu = styled.ul`
   margin: 0;
   padding: 0;
 
-  cursor: pointer;
   .submenu {
     display: flex;
     justify-content: space-between;
@@ -52,11 +51,16 @@ const TabMenu = styled.ul`
     padding: 10px 10px 10px 12px;
     font-size: 15px;
     transition: 0.5s;
+
+    cursor: pointer;
   }
 
   .selected {
     background-color: ${colors.default700};
     color: white;
+  }
+  .disabled {
+    pointer-events: none;
   }
 `;
 
@@ -67,6 +71,7 @@ const TabMainIcon = styled.div`
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
+  cursor: pointer;
 `;
 const IndexBox = styled.div<{ isSelected: boolean }>`
   display: flex;
@@ -110,6 +115,8 @@ const Tab: React.FC<tabProps> = ({ tabs, currentTab, setCurrentTab }) => {
         </TabMainIcon>
         {tabs.map((item, index) => {
           const IconComponent = indexBoxArr[index];
+
+          const isDisabled = item === "Inpainting";
           return (
             <li
               onClick={() => {
@@ -120,7 +127,9 @@ const Tab: React.FC<tabProps> = ({ tabs, currentTab, setCurrentTab }) => {
                 setCurrentProject(item);
               }}
               key={index + 1}
-              className={item === currentTab ? "submenu selected" : "submenu"}
+              className={`${
+                item === currentTab ? "submenu selected" : "submenu"
+              } ${isDisabled ? "disabled" : ""}`}
             >
               <TabContent>
                 <IconComponent
