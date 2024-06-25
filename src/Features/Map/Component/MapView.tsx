@@ -16,6 +16,7 @@ import useMarker from "../Hooks/useMarker";
 import DetailModal from "../Modal/DetailModal";
 import { defaults as defaultControls } from "ol/control";
 import ZoomBar from "../Bar/ZoomBar";
+import LocationInfo from "./LocationInfo";
 
 interface MarkerProps {
   longitude: number;
@@ -39,6 +40,31 @@ const MapView: React.FC = () => {
   const [selectedMarker, setSelectedMarker] = useState<MarkerProps | null>(
     null
   );
+
+  const locationInfoPositions = [
+    {
+      name: "PyeongTaek port",
+      country: "Republic of Korea",
+      position: [126.837598615, 36.96242917],
+    },
+    {
+      name: "Luxembourg Airport",
+      country: "luxembourg",
+      position: [6.230747225, 49.63796111],
+    },
+  ];
+  const pixeledPositions = map
+    ? locationInfoPositions.map((location) => {
+        const position = map.getPixelFromCoordinate(
+          fromLonLat(location.position)
+        ) as [number, number];
+        return {
+          name: location.name,
+          country: location.country,
+          position: position,
+        };
+      })
+    : [];
 
   const markerPosition = [
     {
@@ -125,7 +151,7 @@ const MapView: React.FC = () => {
             const view = map.getView();
             if (!view) return;
 
-            //center를 마커 위치로
+            //center를 모달 위치로
             const targetCenter = fromLonLat(
               [lon, lat],
               getProjection("EPSG:3857") as ProjectionLike
@@ -161,6 +187,23 @@ const MapView: React.FC = () => {
     };
   }, [map, markerLayer]);
 
+  // useEffect(() => {
+  //   if (!map) return;
+
+  //   const positions = markerPosition.map((marker) => {
+  //     const position = map.getPixelFromCoordinate(
+  //       fromLonLat([marker.longitude, marker.latitude])
+  //     ) as [number, number];
+  //     return {
+  //       name: marker.locationName,
+  //       country: marker.country,
+  //       position: position,
+  //     };
+  //   });
+  //   setLocationInfoPositions(positions);
+  //   console.log(positions);
+  // }, []);
+
   //줌 인/아웃
   const handleZoomIn = () => {
     if (view) {
@@ -185,6 +228,14 @@ const MapView: React.FC = () => {
       <MapContainer ref={mapRef}>
         <ZoomBar handleZoomIn={handleZoomIn} handleZoomOut={handleZoomOut} />
       </MapContainer>
+      {selectedMarker === null &&
+        pixeledPositions.map((info, index) => (
+          <LocationInfo
+            locationName={info.name}
+            country={info.country}
+            position={info.position}
+          />
+        ))}
       {markerClicked && selectedMarker ? (
         <DetailModal
           setMarkerClicked={setMarkerClicked}
