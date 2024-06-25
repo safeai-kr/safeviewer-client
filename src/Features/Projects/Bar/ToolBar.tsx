@@ -62,7 +62,6 @@ const ToolBar: React.FC<ToolProps> = ({ selectedTool, setSelectedTool }) => {
   useEffect(() => {
     const pathnameArr = location.pathname.split("/");
     const projectName = pathnameArr[2];
-    console.log(projectName);
     if (projectName === "shipdetection") {
       setIsDragActive(false);
       setIsMagicBarActive(false);

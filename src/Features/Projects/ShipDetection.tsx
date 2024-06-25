@@ -53,7 +53,7 @@ const ProjectMap = styled.div<{ isToolIng: boolean }>`
   ${({ isToolIng }) =>
     isToolIng &&
     css`
-      filter: blur(5px);
+      filter: blur(2px);
     `}
 `;
 

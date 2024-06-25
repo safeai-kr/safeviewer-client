@@ -179,8 +179,8 @@ const Compression: React.FC = () => {
     );
     const initialView = new View({
       center: initialCoordinates,
-      zoom: 17, // 초기 줌 레벨
-      minZoom: 15, // 최소 줌 레벨
+      zoom: 17.5, // 초기 줌 레벨
+      minZoom: 17, // 최소 줌 레벨
       maxZoom: 21, // 최대 줌 레벨
       projection: "EPSG:3857",
     });
