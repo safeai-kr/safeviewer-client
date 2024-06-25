@@ -12,7 +12,7 @@ import {
   transformExtent,
 } from "ol/proj";
 import styled, { css } from "styled-components";
-import { WMTS } from "ol/source";
+import { Vector, WMTS } from "ol/source";
 import { defaults as defaultControls } from "ol/control";
 import { getTopLeft, getWidth } from "ol/extent";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
@@ -67,7 +67,7 @@ const ProjectMap = styled.div<{ isToolIng: boolean }>`
   ${({ isToolIng }) =>
     isToolIng &&
     css`
-      filter: blur(5px);
+      filter: blur(2px);
     `}
 `;
 
@@ -104,16 +104,6 @@ const BlurScreen = styled.div<{ selection: Selection | null }>`
     `}
 `;
 
-const DetectionBox = styled.div<{ box: [number, number, number, number] }>`
-  position: absolute;
-  border: 2px solid red;
-  left: ${({ box }) => box[0]}px;
-  top: ${({ box }) => box[1] + 68}px;
-  width: ${({ box }) => box[2] - box[0]}px;
-  height: ${({ box }) => box[3] - box[1]}px;
-  z-index: 1000;
-`;
-
 const SelectedBox = styled.div`
   position: absolute;
   border: 1px solid #fff;
@@ -127,7 +117,6 @@ const CustomDetection: React.FC = () => {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const mutation = useDetectionApi();
 
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
   // 기본값 설정
   const [longitude, setLongitude] = useState<number>(126.837598615);
   const [latitude, setLatitude] = useState<number>(36.96242917);
@@ -139,6 +128,9 @@ const CustomDetection: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
 
+  //벡터 레이어(BBOX) 참조 상태
+  const [vectorLayer, setVectorLayer] =
+    useState<VectorLayer<VectorSource> | null>(null);
   const [view, setView] = useState<View | null>(null);
 
   //선택된 영역
@@ -375,11 +367,10 @@ const CustomDetection: React.FC = () => {
       maxLon,
       maxLat,
     ];
-    console.log(selectionExtent);
     if (!modelOutput.results) return;
     const results: Result[] = JSON.parse(modelOutput.results);
 
-    if (!results || results.length === 0) return;
+    if (!results || !results.length || results.length === 0) return;
     console.log(results);
 
     results.forEach((result) => {
@@ -413,11 +404,12 @@ const CustomDetection: React.FC = () => {
       vectorSource.addFeature(feature);
     });
 
-    const vectorLayer = new VectorLayer({
+    const newVectorLayer = new VectorLayer({
       source: vectorSource,
     });
 
-    map.current.addLayer(vectorLayer);
+    map.current.addLayer(newVectorLayer);
+    setVectorLayer(newVectorLayer);
   };
 
   useEffect(() => {
@@ -465,6 +457,13 @@ const CustomDetection: React.FC = () => {
           setSelection(null);
           setIsSelected(false);
           setSelectedTool(null);
+          setModelOutput(null);
+          setSearchTxt("");
+          if (map.current && vectorLayer) {
+            map.current.removeLayer(vectorLayer);
+            setVectorLayer(null);
+          }
+
           if (map.current) {
             map.current.getInteractions().forEach((interaction) => {
               interaction.setActive(true);
@@ -560,6 +559,12 @@ const CustomDetection: React.FC = () => {
     setSelection(null);
     setIsSelected(false);
     setSelectedTool(null);
+    setModelOutput(null);
+    setSearchTxt("");
+    if (map.current && vectorLayer) {
+      map.current.removeLayer(vectorLayer);
+      setVectorLayer(null);
+    }
     if (map.current) {
       map.current.getInteractions().forEach((interaction) => {
         interaction.setActive(true);
@@ -569,7 +574,7 @@ const CustomDetection: React.FC = () => {
 
   //영역 지정하면 api호출
   useEffect(() => {
-    if (screenshotUrl && searchTxt) {
+    if (screenshotUrl && searchTxt !== "") {
       handleApiCall();
     }
   }, [screenshotUrl, searchTxt]);
@@ -640,6 +645,8 @@ const CustomDetection: React.FC = () => {
         searchTxt={searchTxt}
         setSearchTxt={setSearchTxt}
         modelOutput={modelOutput}
+        selection={selection}
+        isSelected={isSelected}
       />
     </>
   );
