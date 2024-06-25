@@ -1,13 +1,14 @@
 {
   "files": {
     "main.css": "/static/css/main.d13857aa.css",
-    "main.js": "/static/js/main.97e62116.js",
-    "static/media/after1.png": "/static/media/after1.69993cdaa3e488849a06.png",
-    "static/media/after2.png": "/static/media/after2.d812172df93dd0fa6846.png",
+    "main.js": "/static/js/main.f35beb64.js",
+    "static/media/before1.png": "/static/media/before1.7c61e9e8bdea828b7976.png",
+    "static/media/before2.png": "/static/media/before2.1319e49f12cebcb0e310.png",
+    "static/media/after2.png": "/static/media/after2.4242ac4c72915d32a09b.png",
+    "static/media/after1.png": "/static/media/after1.18e251cb0d347ea27ce3.png",
     "static/media/project1_preview.png": "/static/media/project1_preview.a2776029f6f9286b1c7c.png",
     "static/media/project3_preview.png": "/static/media/project3_preview.678d0b9706500d78cbb9.png",
     "static/media/project2_preview.png": "/static/media/project2_preview.42e3fb9135373459a92a.png",
-    "static/media/super-resolution1.png": "/static/media/super-resolution1.d48c29f64b9fa3e42730.png",
     "static/media/project4_preview.png": "/static/media/project4_preview.ddacce037c547e3a0384.png",
     "static/media/Ship_0016.png": "/static/media/Ship_0016.4bcddafb474abea4fe4c.png",
     "static/media/Ship_0001.png": "/static/media/Ship_0001.6529265ebbef3c484579.png",
@@ -31,7 +32,6 @@
     "static/media/Ship_0024.png": "/static/media/Ship_0024.16e1b015ef82e7e4c0fd.png",
     "static/media/Ship_0023.png": "/static/media/Ship_0023.065efa6ee0429da44a08.png",
     "static/media/Ship_0009.png": "/static/media/Ship_0009.5ed3e300187fe5eaa35f.png",
-    "static/media/super-resolution2.jpg": "/static/media/super-resolution2.2092ea76b7282e6bec00.jpg",
     "static/media/Ship_0025.png": "/static/media/Ship_0025.c7dee5d10a05eadf64d3.png",
     "static/media/Ship_0028.png": "/static/media/Ship_0028.cc048d148a92b722381c.png",
     "static/media/Ship_0003.png": "/static/media/Ship_0003.763636a0ca82aa937f2d.png",
@@ -58,10 +58,10 @@
     "static/media/tap_project4.svg": "/static/media/tap_project4.cfe025a0a886ec62e1c39617d25fa8ee.svg",
     "static/media/tap_project1.svg": "/static/media/tap_project1.cf83b6fed60486c40bb2178853c58d07.svg",
     "main.d13857aa.css.map": "/static/css/main.d13857aa.css.map",
-    "main.97e62116.js.map": "/static/js/main.97e62116.js.map"
+    "main.f35beb64.js.map": "/static/js/main.f35beb64.js.map"
   },
   "entrypoints": [
     "static/css/main.d13857aa.css",
-    "static/js/main.97e62116.js"
+    "static/js/main.f35beb64.js"
   ]
 }
