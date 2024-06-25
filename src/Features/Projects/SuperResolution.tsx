@@ -31,7 +31,7 @@ const ProjectMap = styled.div<{ isMagicTip: boolean }>`
   ${({ isMagicTip }) =>
     isMagicTip &&
     css`
-      filter: blur(5px);
+      filter: blur(2px);
     `}
 `;
 
@@ -275,6 +275,7 @@ const SuperResolution: React.FC = () => {
                 setOutputImageUrl(outputUrlFromStatus);
                 setIsLoading(false);
                 clearInterval(statusInterval); // 요청 멈추기
+                clearTimeout(timeout);
               }
             } catch (error) {
               console.error("Error: ", error);
@@ -282,6 +283,12 @@ const SuperResolution: React.FC = () => {
           };
           // 1.5초마다 fetchStatus 함수 호출
           const statusInterval = setInterval(fetchStatus, 1500);
+          // 10초 후에 요청 멈추기
+          const timeout = setTimeout(() => {
+            clearInterval(statusInterval);
+            setIsLoading(false);
+            console.log("Timeout: 요청이 너무 오래 걸렸습니다.");
+          }, 10000); // 10초 후에 요청을 멈춤
         }
       },
       onError: (error) => {
@@ -289,6 +296,7 @@ const SuperResolution: React.FC = () => {
       },
     });
   };
+
   const handleZoomIn = () => {
     if (view) {
       const zoom = view.getZoom();
@@ -314,12 +322,12 @@ const SuperResolution: React.FC = () => {
   const images = [
     {
       id: 1,
-      src1: require("./super-resolution1.png"),
+      src1: require("./before1.png"),
       src2: require("./after1.png"),
     },
     {
       id: 2,
-      src1: require("./super-resolution2.jpg"),
+      src1: require("./before2.png"),
       src2: require("./after2.png"),
     },
   ];
