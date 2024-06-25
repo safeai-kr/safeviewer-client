@@ -15,6 +15,7 @@ const LocationInfo: React.FC<LocationInfoProps> = ({
 }) => {
   useEffect(() => {
     if (position === null) return;
+    console.log(position);
   }, [position]);
   return (
     <LocationContainer position={position}>
@@ -34,8 +35,8 @@ const LocationContainer = styled.div<{ position: number[] }>`
   position: absolute;
   border-radius: 8px;
   background: ${colors.default900};
-  left: ${({ position }) => `${position[0] - 75}px`};
-  top: ${({ position }) => `${position[1] - 60}px`};
+  left: ${({ position }) => (position ? `${position[0] - 75}px` : `120px`)};
+  top: ${({ position }) => (position ? `${position[1] - 60}px` : "120px")};
   &::after {
     content: "";
     position: absolute;
