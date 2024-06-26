@@ -59,7 +59,21 @@ const ProjectMap = styled.div<{ isToolIng: boolean }>`
     top: 0;
     left: 0;
   }
-  
+  ${({ isToolIng }) =>
+    isToolIng &&
+    css`
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(24, 25, 25, 0.50);
+        backdrop-filter: blur(3px);
+        z-index: 999; 
+      }
+    `}
 `;
 
 //before 가상 요소는 선택된 영역의 크기와 위치를 지정하고, box-shadow를 사용하여 선택된 영역 외부를 어둡게 만듭니다.
@@ -76,7 +90,7 @@ const BlurScreen = styled.div<{ selection: Selection | null }>`
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(57, 58, 63, 0.50);
         backdrop-filter: blur(2.5px);
         clip-path: polygon(
           0% 0%,

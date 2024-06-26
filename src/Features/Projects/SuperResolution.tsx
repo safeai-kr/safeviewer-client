@@ -28,6 +28,22 @@ const ProjectMap = styled.div<{ isMagicTip: boolean }>`
     top: 0;
     left: 0;
   }
+  ${({ isMagicTip }) =>
+    isMagicTip &&
+    css`
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(24, 25, 25, 0.50);
+        backdrop-filter: blur(3px);
+        z-index: 999; 
+      }
+    `}
+      
   
 `;
 
@@ -46,7 +62,7 @@ const BlurOverlay = styled.div<{
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(57, 58, 63, 0.50);
   backdrop-filter: blur(2.5px);
   z-index: 1000;
   pointer-events: none;

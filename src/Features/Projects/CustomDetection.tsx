@@ -64,6 +64,21 @@ const ProjectMap = styled.div<{ isToolIng: boolean }>`
     top: 0;
     left: 0;
   }
+  ${({ isToolIng }) =>
+    isToolIng &&
+    css`
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(24, 25, 25, 0.50);
+        backdrop-filter: blur(3px);
+        z-index: 999; 
+      }
+    `}
   
 `;
 
@@ -81,7 +96,7 @@ const BlurScreen = styled.div<{ selection: Selection | null }>`
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(57, 58, 63, 0.50);
         backdrop-filter: blur(2.5px);
         clip-path: polygon(
           0% 0%,
@@ -380,14 +395,14 @@ const CustomDetection: React.FC = () => {
     results.forEach((result) => {
       const bboxCoords = result.oriented_bbox.map((point) => {
         const latLon = pixelToLatLon(point, selectionExtent, selection);
-        const transformedPixel = map?.current?.getPixelFromCoordinate(
-          transform(latLon, "EPSG:4326", "EPSG:3857")
-        );
+        // const transformedPixel = map?.current?.getPixelFromCoordinate(
+        //   transform(latLon, "EPSG:4326", "EPSG:3857")
+        // );
   
         // 기존 픽셀 좌표와 변환된 후 다시 변환한 픽셀 좌표를 비교하여 콘솔에 출력
-        console.log("Original pixel:", point);
-        console.log("Transformed pixel:", transformedPixel);
-        console.log(latLon)
+        // console.log("Original pixel:", point);
+        // console.log("Transformed pixel:", transformedPixel);
+        // console.log(latLon)
         return transform(latLon, "EPSG:4326", "EPSG:3857");
       });
       // console.log(bboxCoords);
