@@ -64,11 +64,7 @@ const ProjectMap = styled.div<{ isToolIng: boolean }>`
     top: 0;
     left: 0;
   }
-  ${({ isToolIng }) =>
-    isToolIng &&
-    css`
-      filter: blur(2px);
-    `}
+  
 `;
 
 //before 가상 요소는 선택된 영역의 크기와 위치를 지정하고, box-shadow를 사용하여 선택된 영역 외부를 어둡게 만듭니다.
@@ -358,6 +354,9 @@ const CustomDetection: React.FC = () => {
       selection.y + selection.height,
     ]);
 
+    console.log(topLeft)
+    console.log(bottomRight)
+    console.log(selection)
     const [minLon, maxLat] = transform(topLeft, "EPSG:3857", "EPSG:4326");
     const [maxLon, minLat] = transform(bottomRight, "EPSG:3857", "EPSG:4326");
 
@@ -373,12 +372,25 @@ const CustomDetection: React.FC = () => {
     if (!results || !results.length || results.length === 0) return;
     console.log(results);
 
+    // const mapCanvas = mapRef.current?.querySelector("canvas");
+    // if (!mapCanvas) return;
+
+    // const imageWidth = mapCanvas.width;
+    // const imageHeight = mapCanvas.height;
     results.forEach((result) => {
       const bboxCoords = result.oriented_bbox.map((point) => {
         const latLon = pixelToLatLon(point, selectionExtent, selection);
+        const transformedPixel = map?.current?.getPixelFromCoordinate(
+          transform(latLon, "EPSG:4326", "EPSG:3857")
+        );
+  
+        // 기존 픽셀 좌표와 변환된 후 다시 변환한 픽셀 좌표를 비교하여 콘솔에 출력
+        console.log("Original pixel:", point);
+        console.log("Transformed pixel:", transformedPixel);
+        console.log(latLon)
         return transform(latLon, "EPSG:4326", "EPSG:3857");
       });
-      console.log(bboxCoords);
+      // console.log(bboxCoords);
       const labelColorMap: { [key: number]: string } = {
         0: "#FF9635",
         1: "#16E78F",
@@ -525,8 +537,8 @@ const CustomDetection: React.FC = () => {
     const mapCanvas = mapRef.current?.querySelector("canvas");
     if (!mapCanvas) return;
 
-    const scaleX = mapCanvas.width / rect.width;
-    const scaleY = mapCanvas.height / rect.height;
+    const scaleX = mapCanvas.width / rect.width / window.devicePixelRatio;
+    const scaleY = mapCanvas.height / rect.height / window.devicePixelRatio;
 
     // 크롭된 캔버스 설정(캔버스 중에 사용하고 싶은 일부분)
     const croppedCanvas = document.createElement("canvas");
@@ -539,10 +551,10 @@ const CustomDetection: React.FC = () => {
     croppedCanvas.height = selection.height * scaleY;
     context.drawImage(
       mapCanvas,
-      selection.x * scaleX,
-      selection.y * scaleY,
-      croppedCanvas.width,
-      croppedCanvas.height,
+      selection.x * window.devicePixelRatio, // 좌표에 DPI 보정 추가
+      selection.y * window.devicePixelRatio,
+      selection.width * window.devicePixelRatio, // 너비와 높이에 DPI 보정 추가
+      selection.height * window.devicePixelRatio,
       0,
       0,
       selection.width * scaleX,
