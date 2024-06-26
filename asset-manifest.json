@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.d13857aa.css",
-    "main.js": "/static/js/main.5f1442a4.js",
+    "main.js": "/static/js/main.58981221.js",
     "static/media/before1.png": "/static/media/before1.7c61e9e8bdea828b7976.png",
     "static/media/before2.png": "/static/media/before2.1319e49f12cebcb0e310.png",
     "static/media/after2.png": "/static/media/after2.4242ac4c72915d32a09b.png",
@@ -41,7 +41,7 @@
     "static/media/project1_coordinate.svg": "/static/media/project1_coordinate.360db3ea6518268366c6d6dded06a1ae.svg",
     "static/media/2_satellite.svg": "/static/media/2_satellite.3d189c65d3b4cbea9d27ecda523780d7.svg",
     "static/media/tap_project3.svg": "/static/media/tap_project3.2e1447e2a10d6bbbb4345985a9b4a425.svg",
-    "static/media/marker.svg": "/static/media/marker.93eced7c443fe118d82d5dc46bdb46fd.svg",
+    "static/media/marker.svg": "/static/media/marker.754434eb9953128a3aa4c9e877c34339.svg",
     "static/media/project4_modal_shield.svg": "/static/media/project4_modal_shield.9fe1e48de2a3228c6ebb8d91c4764806.svg",
     "static/media/1_coordinate.svg": "/static/media/1_coordinate.f646cb64ff96538556392a80dda7d8f8.svg",
     "static/media/project1_list.svg": "/static/media/project1_list.abf6c7e1fa9f4c70906f67fedebbbd2f.svg",
@@ -49,7 +49,7 @@
     "static/media/tool1_rectangle.svg": "/static/media/tool1_rectangle.7c5f74d8bc436429037f93ffa539d8a3.svg",
     "static/media/tool2_image effect.svg": "/static/media/tool2_image effect.70686084c0878561fbff277eefe40fcd.svg",
     "static/media/project3_shild_superresolution.svg": "/static/media/project3_shild_superresolution.976ebd45e38359400b2a5509a648296f.svg",
-    "static/media/home_map.svg": "/static/media/home_map.61bc6b2f70964237b78d81c8923a0f3d.svg",
+    "static/media/home_map.svg": "/static/media/home_map.5cf05413d60c50aa96a8184b367c3477.svg",
     "static/media/tap_project2.svg": "/static/media/tap_project2.098b3275efef242986692ea34a8d9f6b.svg",
     "static/media/project1_length.svg": "/static/media/project1_length.19238d77ccdfcea801f6e9a1258e592c.svg",
     "static/media/project4_export.svg": "/static/media/project4_export.5111910452d7a195b764fcdba246ba6b.svg",
@@ -58,10 +58,10 @@
     "static/media/tap_project4.svg": "/static/media/tap_project4.cfe025a0a886ec62e1c39617d25fa8ee.svg",
     "static/media/tap_project1.svg": "/static/media/tap_project1.cf83b6fed60486c40bb2178853c58d07.svg",
     "main.d13857aa.css.map": "/static/css/main.d13857aa.css.map",
-    "main.5f1442a4.js.map": "/static/js/main.5f1442a4.js.map"
+    "main.58981221.js.map": "/static/js/main.58981221.js.map"
   },
   "entrypoints": [
     "static/css/main.d13857aa.css",
-    "static/js/main.5f1442a4.js"
+    "static/js/main.58981221.js"
   ]
 }
