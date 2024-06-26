@@ -50,11 +50,7 @@ const ProjectMap = styled.div<{ isToolIng: boolean }>`
     top: 0;
     left: 0;
   }
-  ${({ isToolIng }) =>
-    isToolIng &&
-    css`
-      filter: blur(2px);
-    `}
+  
 `;
 
 //before 가상 요소는 선택된 영역의 크기와 위치를 지정하고, box-shadow를 사용하여 선택된 영역 외부를 어둡게 만듭니다.

@@ -28,11 +28,7 @@ const ProjectMap = styled.div<{ isMagicTip: boolean }>`
     top: 0;
     left: 0;
   }
-  ${({ isMagicTip }) =>
-    isMagicTip &&
-    css`
-      filter: blur(2px);
-    `}
+  
 `;
 
 const BlurOverlay = styled.div<{
